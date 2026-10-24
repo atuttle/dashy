@@ -4,8 +4,10 @@ One unit, bought new from Currys (UK). Host: Windows 11, USB, platform-tools 37.
 **not** been on Wi-Fi at any point in this record.
 
 Status: root ADB over USB with no flash writes. Partitions backed up over ADB; updaters and Frameo
-disabled; WebView updated from 91 to 156 as an ordinary package update; Home Assistant (minimal)
-as Home. All changes are in `/data` and can be undone with `pm`. Not yet on Wi-Fi.
+disabled. All changes are in `/data` and can be undone. **WebView can't render on this firmware**
+(any version; see below), so the Home Assistant app hangs. The working result is **Firefox showing
+the Home Assistant dashboard full screen at boot**, started by a small Home app
+([`scripts/firefox-home`](../scripts/firefox-home/README.md)).
 
 ## Summary
 
@@ -18,7 +20,7 @@ as Home. All changes are in `/data` and can be undone with `pm`. Not yet on Wi-F
 | RAM / storage | ~1 GB (`MemTotal` 978720 kB), `ro.config.low_ram=true`; 32 GB eMMC, `/data` 26 GB |
 | Display | `ro.sf.lcd_density` 160; panel mounted rotated (`ro.vendor.sf.rotation` 270, touch rotation 90) |
 | Frameo | `net.frameo.frame` v1.27.5 (versionCode 54800), priv-app |
-| WebView | `com.android.webview` 91.0.4472.114 stock, AOSP test-key signed; updated to 156 ([below](#webview-update-with-the-aosp-test-key)) |
+| WebView | `com.android.webview` 91.0.4472.114 stock, AOSP test-key signed. 156 installs as an update, but **no renderer starts on this firmware** ([below](#webview-cant-render-anything-on-this-firmware)) |
 | USB | `1f3a:1001`, name `SDPFHD10W25`, ADB interface `FF/42/01`, WinUSB bound automatically on Windows |
 | ADB | On out of the box (`persist.sys.usb.config=adb`), key check on (`ro.adb.secure=1`) |
 | Root | `adb shell` is `uid=0` (`ro.secure=0`, `ro.debuggable=1`), context `u:r:su:s0`, SELinux permissive |
@@ -145,8 +147,8 @@ All changes are in `/data`; no partition was written.
 | # | Change | Command | Undo | Result |
 | --- | --- | --- | --- | --- |
 | 1 | Allwinner updater and Joyhong test app off | `pm disable com.softwinner.update`, `pm disable com.joyhong.test` | `pm enable <pkg>` | See the note below; survived a reboot on the second try |
-| 2 | WebView 91 → 156 | `adb install -r` of the re-signed LineageOS build (below) | `pm uninstall-system-updates com.android.webview` | `dumpsys webviewupdate` current 156.0.8078.47 after reboots; relro exit 0 |
-| 3 | Home Assistant minimal 2026.8.4 | `adb install` of `app-minimal-release.apk`, SHA-256 `8f58a7df71c61447d3370f5d5956a66e3523625dc4b51c8434bd166d3e731bea` (same as the [Rollei 100](rollei-smartframe-100.md)) | `adb uninstall io.homeassistant.companion.android.minimal` | Installs (32-bit); onboarding screen renders |
+| 2 | WebView 91 → 156 | `adb install -r` of the re-signed LineageOS build (below) | `pm uninstall-system-updates com.android.webview` | Installed and selected, but renderers crash (below). **Undone**: back on stock 91 |
+| 3 | Home Assistant minimal 2026.8.4 | `adb install` of `app-minimal-release.apk`, SHA-256 `8f58a7df71c61447d3370f5d5956a66e3523625dc4b51c8434bd166d3e731bea` (same as the [Rollei 100](rollei-smartframe-100.md)) | `adb uninstall io.homeassistant.companion.android.minimal` | Installs (32-bit); native screens and server discovery work; the login page (WebView) never loads |
 | 4 | Home Assistant as Home | `pm enable io.homeassistant.companion.android.minimal/io.homeassistant.companion.android.launch.LauncherAlias`, then `cmd package set-home-activity` with the same component. The in-app switch needs a server connection first | `pm disable` the component | HOME resolves to `LauncherAlias`; comes up after reboot |
 | 5 | SystemUI back on | `pm enable com.android.systemui` | `pm disable com.android.systemui` | Enabled after reboot, but no bars are drawn (see above) |
 | 6 | Frameo off | `pm disable net.frameo.frame` | `pm enable net.frameo.frame` | After reboot: no Frameo, updater or test-app process; HA is Home; ADB still root; no TCP listeners at all |
@@ -157,8 +159,9 @@ The file was written about 8 s later. On this build the file is binary XML; read
 `abx2xml /data/system/users/0/package-restrictions.xml -`. A root `pm` change is recorded as
 `enabledCaller="shell:1000"`.
 
-**Way back:** there is no on-screen route to Android Settings (no bars, and Home Assistant has no
-escape menu). The way back is USB ADB: `adb shell am start -a android.settings.SETTINGS`. ADB does
+**Way back:** the firmware has no on-screen route to Android Settings (no bars). With the Firefox
+Home app below, power-cycle the frame and tap **Android settings** during the 10 s countdown.
+Otherwise use USB ADB: `adb shell am start -a android.settings.SETTINGS`. ADB does
 not depend on Frameo: it was on before Frameo setup (`persist.sys.usb.config=adb`,
 `adb_enabled=1`) and stayed on through four reboots, including with Frameo disabled.
 
@@ -185,8 +188,56 @@ No `apksigner` or Java was on the host, so a short stdlib Python v2 signer (with
 -sha256 -sign`) was used; PackageManager verifying the signature on install is the check. Any
 `apksigner sign --key testkey.pk8 --cert testkey.x509.pem` works the same way.
 
-Not yet tested: a real Home Assistant dashboard in WebView 156 (needs the network), and how
-Chromium 156 behaves on 1 GB with `ro.config.low_ram=true`.
+### WebView can't render anything on this firmware
+
+Installing WebView 156 worked, but **no WebView renderer can start on this firmware, with 156 or the
+stock 91**. When the Home Assistant app opened its login page, it hung on the logo. Each time, the
+renderer forked from `webview_zygote` aborted at once:
+
+```text
+F webview_zygote: JNI FatalError called: (zygote) Failed open(/sys/kernel/tracing/trace_marker, 1): Permission denied
+```
+
+`webview_zygote` holds `/sys/kernel/tracing/trace_marker` open, and the forked isolated renderer
+has to reopen it. On this build `/sys/kernel/tracing` is mode `0700 root`, so it can't. Ten
+tombstones, all `webview_zygote` with this abort. The last came after a reboot with only the
+stock WebView 91 installed (`pm uninstall-system-updates com.android.webview`). The first ones
+appeared only once something used WebView (Frameo never did here). So any WebView-based app
+(the Home Assistant app, this repo's kiosk, Fully Kiosk) hangs on this frame.
+
+## Dashboard: Firefox web app, started by a Home app
+
+Firefox brings its own engine (Gecko). Its tab and GPU processes are ordinary app processes, not
+forked from `webview_zygote`, so the trace_marker abort doesn't apply. The end result: the Home
+Assistant dashboard full screen at boot, with no taps.
+
+| # | Change | How | Undo |
+| --- | --- | --- | --- |
+| 7 | Firefox 158.0.2 `armeabi-v7a` | `adb install` from `archive.mozilla.org/pub/fenix/releases/158.0.2/`, SHA-256 `939002048eecad439ab1b81aca8644c842f731bf6f9a0feb03cfcf45d1204013`, signer `CN=Release Engineering, O=Mozilla Corporation`, cert SHA-256 `A7:8B:62:A5:…:9B:04` (same as in [biuframe.md](biuframe.md)). The owner did Firefox's first-run screens (terms) on the panel | `adb uninstall org.mozilla.firefox` |
+| 8 | Boot Home app | [`scripts/firefox-home`](../scripts/firefox-home/README.md), set with `cmd package set-home-activity` | `adb uninstall com.photoframe.firefoxhome` |
+| 9 | Dashboard as a Firefox web app | Firefox **⋮ → More → Add app to Home screen** on the dashboard; the Home app accepts the pinned shortcut and launches it | Uninstall the Home app, or Firefox |
+
+Observations:
+
+- **First Firefox launch:** every Gecko child process failed to bind (`ServiceAllocator$BindException:
+  Cannot connect to process`, `Failed to launch tab subprocess`), so the page stayed blank. No
+  reason was logged by system_server. Starting the GPU service from a root shell worked. After
+  `am force-stop org.mozilla.firefox` and a relaunch, the child processes started and pages
+  rendered. It did not happen again, including after reboots. Guess: the vendor
+  `BackgroundManagerService` (a thread of that name is in system_server) during first launch.
+- **The web app needs `https`.** In Firefox 158 the `VIEW_PWA` intent filter only accepts
+  `https`, and a plain `http://<ip>:8123` dashboard opens in a normal tab with the toolbar. Here
+  the dashboard is served through the owner's HTTPS reverse proxy.
+- **"Add app to Home screen" only appears when the default Home app can pin shortcuts.** With
+  a Home app that has no `CONFIRM_PIN_SHORTCUT` activity, the menu shows only "Add to
+  shortcuts" (Firefox's own top sites). `scripts/firefox-home` accepts the pin and stores
+  Firefox's shortcut ID (`https://<site>/?homescreen=1`).
+- The first web-app launch after the pin hung on Home Assistant's splash (connections to the
+  proxy were open). After `am force-stop` of Firefox and a relaunch through the Home app, it
+  loaded. Not seen again.
+- **Boot timing**, one run: web app in front 55 s after `adb reboot`, dashboard fully drawn by
+  95 s. Firefox about 143 MB PSS; about 270 MB of RAM available afterwards.
+- Home Assistant's frontend (2026.10) renders and stays logged in ("Keep me logged in").
 
 ## Before Wi-Fi
 
