@@ -333,7 +333,7 @@
 
   // ------------------------------------------------------------ boot
   App.start = function () {
-    App.setTime(15, 18); // demo default: a busy weekday afternoon
+    App.setTime(null); // Use the frame's real clock; demo controls can still override it.
     fit();
     window.addEventListener('resize', fit);
     // Switch tabs the instant a finger lands (pointerdown), not on release. Keyboard "clicks"

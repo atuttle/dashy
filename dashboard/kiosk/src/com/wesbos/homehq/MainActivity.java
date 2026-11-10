@@ -199,6 +199,8 @@ public class MainActivity extends Activity {
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
     s.setUseWideViewPort(true);
+    // This fixed-layout wall dashboard uses its own scaling; keep Android's menu text size intact.
+    s.setTextZoom(100);
     s.setMediaPlaybackRequiresUserGesture(false);
     // Keep navigation inside the kiosk. When the kiosk starts at boot before Wi-Fi is up, the
     // first load fails and would stay on the error page, so retry failed main-frame loads.
