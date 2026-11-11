@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <g id="flower" fill="#FFF7EA">
+      <ellipse cy="-12" rx="7" ry="13"/>
+      <ellipse cy="-12" rx="7" ry="13" transform="rotate(72)"/>
+      <ellipse cy="-12" rx="7" ry="13" transform="rotate(144)"/>
+      <ellipse cy="-12" rx="7" ry="13" transform="rotate(216)"/>
+      <ellipse cy="-12" rx="7" ry="13" transform="rotate(288)"/>
+      <circle r="6" fill="#BDA6C2"/>
+    </g>
+    <path id="leaf" d="M0 0C-3-19 12-31 25-27 26-11 16-1 0 0z" fill="#B3C3AB"/>
+  </defs>
+  <g stroke="#A6B39F" stroke-width="1.8" opacity=".45">
+    <path d="M532 245c-15-57-23-90-4-129M564 242c-5-64 20-99 41-128M416 242c-10-25-15-44-9-63"/>
+  </g>
+  <g opacity=".48">
+    <use href="#leaf" transform="translate(520 184) rotate(-25)"/>
+    <use href="#leaf" transform="translate(530 208) rotate(-105)"/>
+    <use href="#leaf" transform="translate(568 183) rotate(-5)"/>
+    <use href="#leaf" transform="translate(415 219) rotate(-100) scale(.7)"/>
+  </g>
+  <g opacity=".65">
+    <use href="#flower" transform="translate(529 115) rotate(16) scale(1.25)"/>
+    <use href="#flower" transform="translate(598 118) rotate(-15) scale(.8)"/>
+    <use href="#flower" transform="translate(406 180) rotate(20) scale(.7)"/>
+    <use href="#flower" transform="translate(363 45) rotate(-18) scale(.5)"/>
+  </g>
+  <g fill="#C6AEC7" opacity=".45"><circle cx="463" cy="53" r="3"/><circle cx="475" cy="65" r="2"/><circle cx="326" cy="207" r="2.5"/></g>
+</svg>

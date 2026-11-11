@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <g id="leaf">
+      <path d="M0 29C-24 10-20-13 0-27 20-13 24 10 0 29z" fill="#CA7952"/>
+      <path d="M0-19v48M-11-5 0 6 11-5M-12 8 0 19 12 8" stroke="#793D2B" stroke-width="1.5"/>
+    </g>
+    <g id="maple">
+      <path d="m0-28 7 13 9-9-2 18 16-3-11 15 8 4-22 9-5 13-5-13-22-9 8-4-11-15 16 3-2-18 9 9z" fill="#B9613D"/>
+      <path d="M0-17v49M-16 3 0 16 16 3" stroke="#793D2B" stroke-width="1.5"/>
+    </g>
+  </defs>
+  <g opacity=".38">
+    <use href="#leaf" transform="translate(383 42) rotate(-37) scale(.8)"/>
+    <use href="#maple" transform="translate(488 148) rotate(28)"/>
+    <use href="#leaf" transform="translate(335 198) rotate(42) scale(.7)"/>
+    <use href="#maple" transform="translate(570 46) rotate(-13) scale(.65)"/>
+  </g>
+  <g stroke="#D0926C" stroke-width="2" stroke-linecap="round" opacity=".26">
+    <path d="M596 240c-18-59-27-103-25-163M573 240c-3-38-4-71 3-106"/>
+    <path d="M571 92q-16-4-15-17 15 3 15 17zm0 15q-18-4-18-17 16 3 18 17zm2 15q-19-3-20-16 17 1 20 16zm2 15q-18-2-22-15 18 0 22 15zm3 15q-18-2-22-14 18-1 22 14zM571 99q16-5 17-18-16 4-17 18zm1 15q18-5 18-18-17 3-18 18zm2 15q19-4 20-17-18 2-20 17zm3 15q18-4 20-17-18 2-20 17z"/>
+  </g>
+  <g transform="translate(423 185) rotate(-20)" opacity=".35">
+    <path d="M-13-1c-1 18 7 28 13 30C6 27 14 17 13-1z" fill="#C8845C"/>
+    <path d="M-17 0c0-17 34-17 34 0z" fill="#A96643"/>
+    <path d="M0-12v-7" stroke="#C8845C" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <g id="balloon">
+      <ellipse cy="-5" rx="17" ry="23"/>
+      <path d="m0 18-4 6h8z"/>
+      <path d="M0 24c-12 18 12 27 0 47" stroke-width="1.5"/>
+    </g>
+  </defs>
+  <g fill="#CD5A55" stroke="#CD5A55" opacity=".25">
+    <use href="#balloon" transform="translate(497 51) rotate(-14)"/>
+    <use href="#balloon" transform="translate(559 101) rotate(12) scale(1.2)"/>
+    <use href="#balloon" transform="translate(403 171) rotate(-20) scale(.65)"/>
+  </g>
+  <g transform="translate(513 190) rotate(8)" opacity=".3">
+    <path d="M-26-15h52v41h-52zM-30-22h60v12h-60z" fill="#D85C59"/>
+    <path d="M-3-22h6v48h-6z" fill="#FFB5A4"/>
+    <path d="M0-22c-27-1-18-27-6-17L0-22zm0 0c27-1 18-27 6-17L0-22z" stroke="#D85C59" stroke-width="3"/>
+  </g>
+  <g stroke="#C95254" stroke-width="2.5" stroke-linecap="round" opacity=".26">
+    <path d="M588-5q-25 18-7 29t-8 28M361 18q-16 8-6 18t-6 19M288 178q17-5 18 7t15 7m103-79 5 9m-26-41 8-5m50 128-3 10m94-41 7 5"/>
+  </g>
+  <g fill="#CD5A55" opacity=".3">
+    <path d="m317 51 6 3-5 10-6-3zm131-15 5-2 4 9-5 2zm-89 177 6-3 4 8-6 3z"/>
+    <circle cx="379" cy="103" r="2.5"/><circle cx="461" cy="166" r="2"/><circle cx="581" cy="218" r="2.5"/>
+  </g>
+</svg>

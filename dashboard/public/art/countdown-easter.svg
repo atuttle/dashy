@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <path id="egg" d="M0 26c-14 0-24-9-24-23 0-17 14-39 24-39S24-14 24 3C24 17 14 26 0 26z"/>
+    <g id="flower" fill="#F7ECE4"><ellipse cy="-7" rx="4" ry="7"/><ellipse cy="7" rx="4" ry="7"/><ellipse cx="-7" rx="7" ry="4"/><ellipse cx="7" rx="7" ry="4"/><circle r="3.5" fill="#C6ADB8"/></g>
+  </defs>
+  <g transform="translate(420 184) rotate(-15)" opacity=".58">
+    <use href="#egg" fill="#BEACD0"/>
+    <path d="m-22-3 11 5 11-8 11 8 11-5M-20 13l10 4 10-6 10 6 10-4" stroke="#DCE8D7" stroke-width="3"/>
+  </g>
+  <g transform="translate(571 48) rotate(17) scale(.65)" opacity=".5">
+    <use href="#egg" fill="#D7AFB0"/>
+    <circle cx="-9" cy="-10" r="3" fill="#DCE8D7"/><circle cx="9" cy="1" r="3" fill="#DCE8D7"/><circle cx="-6" cy="12" r="3" fill="#DCE8D7"/>
+  </g>
+  <g fill="#AFC7AB" opacity=".48">
+    <ellipse cx="525" cy="157" rx="12" ry="42" transform="rotate(-13 525 157)"/>
+    <ellipse cx="550" cy="156" rx="11" ry="43" transform="rotate(12 550 156)"/>
+    <path d="M509 193c0-18 12-31 28-31s28 13 28 31c18 9 26 24 26 39h-107c0-17 10-32 25-39z"/>
+    <circle cx="586" cy="217" r="12"/>
+  </g>
+  <g opacity=".7"><use href="#flower" transform="translate(345 47) scale(.75)"/><use href="#flower" transform="translate(493 60)"/><use href="#flower" transform="translate(324 204) scale(.65)"/></g>
+  <g stroke="#A1BA9F" stroke-width="1.5" opacity=".45"><path d="M470 232v-30m0 17-10-8m10 0 9-8M371 232v-23m0 13-8-7m8 0 8-6"/></g>
+</svg>

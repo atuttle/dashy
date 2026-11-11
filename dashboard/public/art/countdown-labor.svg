@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <g id="gear">
+      <path d="M-7-30H7l2 9 8 4 9-3 7 12-7 6v9l7 6-7 12-9-3-8 4-2 9H-7l-2-9-8-4-9 3-7-12 7-6v-9l-7-6 7-12 9 3 8-4z" fill="#529396"/>
+      <circle cy="3" r="11" fill="#155C61"/>
+    </g>
+  </defs>
+  <g opacity=".27"><use href="#gear" transform="translate(493 169) rotate(12) scale(1.25)"/><use href="#gear" transform="translate(575 43) rotate(-7) scale(.55)"/></g>
+  <g transform="translate(376 63) rotate(-30)" fill="#7BA9A6" opacity=".22">
+    <path d="M-8-25C-23-18-20 1-7 7l-3 40c-1 10 15 11 15 1L8 8c16-4 20-19 10-30l-3 14-11 3-9-8z"/>
+  </g>
+  <g transform="translate(573 189) rotate(13)" fill="#629C9B" opacity=".25">
+    <path d="M-22 25V-1c0-8 8-8 8 0v-21c0-7 8-7 8 0v-7c0-7 8-7 8 0v6c0-7 8-7 8 0v9c0-7 8-7 8 0v32c0 13-8 19-20 19s-20-4-20-12z"/>
+  </g>
+  <g stroke="#80ADAA" stroke-width="2" opacity=".23"><path d="m447 45 9 9m-9 0 9-9M326 187h12m-6-6v12M545 102l5 5m-5 0 5-5"/></g>
+</svg>

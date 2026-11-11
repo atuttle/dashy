@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <path id="heart" d="M0 25S-24 10-24-6C-24-22-5-27 0-13 5-27 24-22 24-6 24 10 0 25z"/>
+  </defs>
+  <g fill="#D986A5" opacity=".2">
+    <use href="#heart" transform="translate(509 171) rotate(13) scale(2.2)"/>
+    <use href="#heart" transform="translate(581 220) rotate(-20) scale(1.8)"/>
+    <use href="#heart" transform="translate(367 43) rotate(-15) scale(.55)"/>
+    <use href="#heart" transform="translate(295 179) rotate(21) scale(.35)"/>
+  </g>
+  <g stroke="#F2B2C7" stroke-width="1.5" opacity=".26">
+    <use href="#heart" transform="translate(538 47) rotate(18) scale(.85)"/>
+    <use href="#heart" transform="translate(399 167) rotate(-13) scale(.6)"/>
+    <path d="m453 82 3 7 7 3-7 3-3 7-3-7-7-3 7-3zM345 215l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/>
+  </g>
+  <g fill="#E59BB7" opacity=".25"><circle cx="325" cy="88" r="2"/><circle cx="465" cy="39" r="2.5"/><circle cx="565" cy="116" r="2"/></g>
+</svg>

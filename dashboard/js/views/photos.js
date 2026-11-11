@@ -23,6 +23,7 @@
           '<div class="ph-top"><div class="seg seg--glass">' + LAYOUTS.map(function (l) {
             return '<button data-layout="' + l[0] + '" class="' + (l[0] === V.layout ? 'is-on' : '') + '">' + l[1] + '</button>';
           }).join('') + '</div></div>' +
+          '<div class="ph-sync" role="status"></div>' +
           '<div class="ph-bottom">' +
           '  <button class="ph-btn" data-prev>' + App.icon('left', 30) + '</button>' +
           '  <button class="ph-btn ph-btn--fav" data-fav>' + App.icon('heart', 30) + '<span>Favourite</span></button>' +
@@ -43,15 +44,19 @@
           if (t.hasAttribute('data-fav')) {
             var p = V.show.current && V.show.current.photos[0];
             if (!p) return;
-            p.fav = !p.fav;
+            App.setPhotoFavourite(p, !p.fav);
             heart();
             App.toast(p.fav ? 'Added to favourites · it’ll show up more often' : 'Removed from favourites', { icon: 'heart', ms: 2500 });
           }
         });
       }
+      V.el.querySelector('.ph-sync').textContent = App.photoMessage();
       V.show.start();
     },
     resume: function () { V.show.start(); },
     hide: function () { if (V.show) V.show.stop(); }
+  });
+  App.on('photos', function () {
+    if (V.el) V.el.querySelector('.ph-sync').textContent = App.photoMessage();
   });
 })();

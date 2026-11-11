@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "countdowns": { "url": "https://example.com/countdowns.ics" },
+  "travel": { "provider": "tomtom", "homeAddress": "123 Example Street, New York, NY 10001", "apiKey": "replace-with-your-tomtom-key" },
+  "photos": { "albumUrl": "https://photos.app.goo.gl/replace-with-your-album-link" },
+  "weather": {
+    "apiKey": "replace-with-your-pirate-weather-key",
+    "latitude": 40.7128,
+    "longitude": -74.006,
+    "units": "us"
+  },
+  "calendars": [
+    { "id": "dad-personal", "calendar": "dad", "name": "Dad personal", "url": "https://example.com/dad-personal.ics" },
+    { "id": "dad-work", "calendar": "dad", "name": "Dad work", "url": "https://example.com/dad-work.ics" },
+    { "id": "mom", "calendar": "mom", "name": "Mom", "url": "https://example.com/mom.ics" },
+    { "id": "kiddo", "calendar": "kiddo", "name": "Kiddo", "url": "https://example.com/kiddo.ics" },
+    { "id": "family", "calendar": "family", "name": "Family", "url": "https://example.com/family.ics" }
+  ]
+}

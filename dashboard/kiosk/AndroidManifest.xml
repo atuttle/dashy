@@ -17,6 +17,13 @@
       android:usesCleartextTraffic="true"
       android:networkSecurityConfig="@xml/network_security_config"
       android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+    <!-- Shell-only USB provisioning. No raw-config read endpoint or WebView bridge. -->
+    <provider
+        android:name=".ConfigProvider"
+        android:authorities="com.wesbos.homehq.config"
+        android:exported="true"
+        android:permission="android.permission.DUMP"
+        android:grantUriPermissions="false" />
     <service android:name=".NavigationService"
         android:label="@string/navigation_label"
         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

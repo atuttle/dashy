@@ -1,5 +1,107 @@
 # Home HQ kiosk navigation
 
+## Private configuration over USB
+
+With the updated APK installed and USB debugging authorized, run from the repository root:
+
+```sh
+python3 dashboard/kiosk/config.py create
+python3 dashboard/kiosk/config.py import
+python3 dashboard/kiosk/config.py status
+```
+
+`create` generates the ignored `dashboard/config.local.json` from the secrets already
+in `dashboard/.env.local`. The local JSON is created with owner-only permissions;
+keep a backup. `config.example.json` contains the schema and placeholder values.
+Use `create --force` to regenerate the local file after changing your secrets.
+
+`import` streams the JSON over USB directly into Home HQ's app-private storage and
+verifies its SHA-256. No shared-storage or temporary secrets file is created on
+the frame. It replaces the entire configuration; malformed or oversized input
+preserves the previous saved file. `--adb` selects an ADB binary and `--serial`
+selects a device when more than one is connected.
+
+The native app reads the JSON automatically at cold startup. It survives reboots
+and normal `adb install -r` updates. Uninstalling the app, clearing its data, or
+factory-resetting the frame removes it. The file lives in Android's app-private
+no-backup directory, excluded from ordinary automatic backups and from the APK.
+
+The USB provisioning provider requires Android's platform `DUMP` permission,
+which the ADB shell has and ordinary apps do not. It has no raw-config read or
+export operation. Its status response contains only counts, flags, a verification
+digest, and the last import result. **Menu → Configuration** shows the counts on
+the frame without revealing URLs or keys. There is no browser/JavaScript endpoint
+for reading credentials.
+
+With the current bundled dashboard, native `FrameData` handles calendar/weather
+requests using this config. Feed URLs and the weather key stay outside JavaScript.
+Feeds refresh every fifteen minutes and retry after a minute on failure. Calendar
+events are read-only. The frame needs Wi-Fi, but no laptop or hosted backend.
+
+The Calendar refresh button sends `POST /api/calendars` through the trusted WebView
+to force an immediate read of all configured household feeds. It bypasses the
+normal cache/backoff and preserves last-known feed data on failure. It does not
+write to Google Calendar or refresh the separate countdown calendar.
+
+Develop locally and install APK changes only when Dad explicitly requests a frame
+update. Building or changing the dashboard is not permission to deploy it.
+
+Host checks: `python3 dashboard/kiosk/test_config.py`.
+
+### Cached Google Photos
+
+Optional private config: `"photos": {"albumUrl": "https://photos.app.goo.gl/your-album-link"}`.
+Generate it from `GOOGLE_PHOTOS_ALBUM_URL` in ignored `.env.local`, then import over
+USB alongside the existing calendar/weather settings when a frame update is requested.
+The link is a bearer credential: anyone possessing it can view the shared album.
+It is never exposed to JavaScript or included in an APK.
+
+Native `PhotoData` checks the shared album hourly, follows pagination, downloads
+display-sized still images, and serves them to the bundled site with opaque local
+URLs. Photos and the cache index live in Android's app-private no-backup directory.
+Cached photos survive restarts and display without Wi-Fi or the laptop. Interrupted
+file writes recover using Android's AtomicFile. A failed or partial album listing
+preserves the previous complete cache; successful checks apply additions/removals.
+
+Each album cache is limited to 1,000 photos or 512 MiB; recent photos are preferred
+when capped. Failed requests retry after five minutes. Videos are skipped; motion
+photos can display their still image. The reader uses undocumented Google shared-
+album endpoints and may need maintenance if Google changes them. No Google account
+login, cookies, public-storage files, or third-party photo proxy is required.
+
+Uninstalling/clearing Home HQ's app data deletes the private photo cache and config.
+Normal APK updates preserve them. Local edits/builds do not update the frame.
+
+### Countdowns
+
+Optional private config: `"countdowns": {"url": "https://your-private-ical-feed"}`.
+Generate it from `ICAL_COUNTDOWNS_URL` in ignored `.env.local`. `CountdownData`
+persists the sanitized feed in app-private no-backup storage and checks it at
+6 AM, noon, and 5 PM Eastern, accounting for daylight-saving changes. It fetches
+immediately on first use and catches up missed slots when the dashboard resumes.
+Failures retry after five minutes and retain saved dates with an unavailable
+indicator. Source URLs never enter browser responses or the APK. The sidebar's
+Countdowns view replaces Chores; the five household calendar feeds stay separate.
+Its refresh button sends `POST /api/countdowns` to bypass the cache/backoff and
+check immediately, without moving the next scheduled refresh.
+An explicit frame-update request is still required before installing/importing.
+
+### Calendar driving estimates
+
+Optional private config: `"travel": {"provider": "tomtom", "apiKey": "your-key", "homeAddress": "your-address"}`.
+Generate it from `TOMTOM_API_KEY` and `DASHY_HOME_ADDRESS` in ignored `.env.local`.
+Native `TravelData` geocodes street addresses and supplies traffic-aware driving
+times to `/api/travel`. Both credentials and home details remain outside the
+WebView/APK. Routes always start at home. The shared browser code adds drive/6
+buffer, capped at 15 minutes, and drives the existing leave-by indicators.
+
+Routes check every 30 minutes, or five minutes within two hours of departure;
+failures remove the estimate and retry after five minutes. Caches stay in memory.
+Config import replaces the entire file, so keep calendars/weather/photos in the
+same JSON when importing a requested update. Building does not install or import.
+
+## Dashboard navigation
+
 Hold two fingers still on the dashboard for 1.5 seconds to open the native controls. Keep the
 fingers at least an inch (about 2.5 cm) apart: on PF1007L frames the `gslX680` touchscreen reads
 closer fingers as one touch.

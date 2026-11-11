@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <g id="snow" stroke="#8CBCA5" stroke-width="1.5">
+      <path d="M0-12v24M-10-6l20 12M-10 6l20-12M-4-9l4 4 4-4M-4 9l4-4 4 4M-10-1l5-2-1-5M10 1l-5 2 1 5M-10 1l5 2-1 5M10-1l-5-2 1-5"/>
+    </g>
+  </defs>
+  <g stroke="#5F9B7E" opacity=".3" stroke-linecap="round">
+    <path d="M608-8c-42 28-69 57-94 91" stroke-width="4"/>
+    <path d="m589 6-25-2m18 8 10 24M576 17l-27-1m18 9 9 26M561 31l-28 1m18 9 9 25M546 47l-27 3m17 8 7 25M530 66l-23 2m16 7 4 22" stroke-width="2"/>
+  </g>
+  <g stroke="#89B69E" opacity=".3">
+    <path d="M397 0v35M459 0v54M330 0v13"/>
+    <circle cx="397" cy="50" r="15" fill="#4D8A6E"/>
+    <circle cx="459" cy="65" r="11" fill="#86A998"/>
+    <circle cx="330" cy="22" r="9" fill="#4D8A6E"/>
+    <path d="M385 48c8 7 16-7 24 0M452 64h14"/>
+  </g>
+  <g fill="#4E8E6D" opacity=".28">
+    <path d="m509 132-25 34h13l-25 34h18l-25 32h89l-25-32h18l-25-34h12z"/>
+    <path d="m580 105-28 41h15l-29 41h20l-29 45h102l-29-45h20l-29-41h15z"/>
+  </g>
+  <g opacity=".23">
+    <use href="#snow" transform="translate(258 54)"/>
+    <use href="#snow" transform="translate(352 161) scale(.8)"/>
+    <use href="#snow" transform="translate(465 119) scale(.65)"/>
+    <use href="#snow" transform="translate(184 205) scale(.5)"/>
+  </g>
+  <g fill="#89B69E" opacity=".2"><circle cx="300" cy="108" r="2"/><circle cx="414" cy="185" r="2.5"/><circle cx="557" cy="107" r="2"/></g>
+</svg>

@@ -1,0 +1,39 @@
+.countdowns { height: 100%; display: flex; flex-direction: column; gap: 22px; }
+.cd-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex: none; }
+.cd-header h1 { font-size: 52px; line-height: 1.1; }
+.cd-sync { display: flex; align-items: center; gap: 14px; color: var(--mute); font-size: 16px; line-height: 1.4; }
+.cd-sync-text { display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 4px; }
+.cd-sync .icon-btn { color: var(--ink); }
+.cd-sync .icon-btn .i { transform: scaleX(-1); }
+.cd-sync .icon-btn:disabled { opacity: .45; cursor: wait; }
+.cd-sync--error { color: var(--alert); }
+.cd-sync--error .label { color: inherit; }
+.cd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: max-content; gap: 18px; align-content: start; overflow-y: auto; min-height: 0; padding-bottom: 8px; }
+.cd-banner { min-height: 232px; min-width: 0; padding: 20px 28px; border-radius: var(--r); display: flex; flex-direction: column; gap: 6px; color: #FFFFFF; background: var(--ink); }
+.cd-banner > * { flex-shrink: 0; }
+.cd-banner--green { background: #00A36C; }
+.cd-banner--purple { background: #8A58FF; }
+.cd-banner--birthday { background: #FF8F80 url('/art/countdown-birthday.svg') right bottom / cover no-repeat; color: #32202B; }
+.cd-banner--autumn { background: #793D2B url('/art/countdown-thanksgiving.svg') right bottom / cover no-repeat; color: #FFF0DE; }
+.cd-banner--halloween { background: #F98527 url('/art/countdown-halloween.svg') right bottom / cover no-repeat; color: var(--ink); }
+.cd-banner--christmas { background: #145743 url('/art/countdown-christmas.svg') right bottom / cover no-repeat; color: #FFF5E8; }
+.cd-banner--newyear { background: #172641 url('/art/countdown-newyear.svg') right bottom / cover no-repeat; color: #F4EEE7; }
+.cd-banner--valentine { background: #8D3053 url('/art/countdown-valentine.svg') right bottom / cover no-repeat; color: #FFF2F5; }
+.cd-banner--easter { background: #DCE8D7 url('/art/countdown-easter.svg') right bottom / cover no-repeat; color: #24352C; }
+.cd-banner--independence { background: #1B304F url('/art/countdown-independence.svg') right bottom / cover no-repeat; color: #FAF6EF; }
+.cd-banner--stpatrick { background: #086B4A url('/art/countdown-stpatrick.svg') right bottom / cover no-repeat; color: #F0F9EC; }
+.cd-banner--mothers { background: #E4D8EE url('/art/countdown-mothers.svg') right bottom / cover no-repeat; color: #3C2947; }
+.cd-banner--fathers { background: #274B72 url('/art/countdown-fathers.svg') right bottom / cover no-repeat; color: #F5F2E9; }
+.cd-banner--memorial { background: #29394B url('/art/countdown-memorial.svg') right bottom / cover no-repeat; color: #F5F0E7; }
+.cd-banner--wedding { background: #6F283D url('/art/countdown-wedding.svg') right bottom / cover no-repeat; color: #FFF0F2; }
+.cd-banner--anniversary { background: #8A58FF url('/art/countdown-valentine.svg') right bottom / cover no-repeat; }
+.cd-banner--labor { background: #155C61 url('/art/countdown-labor.svg') right bottom / cover no-repeat; color: #F4F4E8; }
+.cd-banner--veterans { background: #3E4D3F url('/art/countdown-veterans.svg') right bottom / cover no-repeat; color: #F0F1E6; }
+.cd-count { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.cd-count strong { font-size: 84px; line-height: .95; }
+.cd-unit { font-size: 24px; font-weight: 800; line-height: 1.1; padding-top: 7px; }
+.cd-unit small { display: block; font-size: 17px; font-weight: 600; margin-top: 3px; }
+.cd-banner h2 { font-size: 40px; line-height: 1.15; overflow-wrap: anywhere; }
+.cd-date { margin-top: auto; padding-top: 4px; font-size: 16px; font-weight: 600; opacity: .85; }
+.cd-empty { grid-column: 1 / -1; font-size: 36px; color: var(--mute); padding: 70px 20px; line-height: 1.2; }
+.rail-item[data-go="countdowns"] { letter-spacing: .025em; font-size: 11px; }

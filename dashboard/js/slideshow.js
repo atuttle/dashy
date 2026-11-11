@@ -4,22 +4,28 @@
   var D = window.DATA;
 
   function src(p, big) {
+    if (p.src) return p.src;
     var w = p.o === 'p' ? 800 : 1600, h = p.o === 'p' ? 1200 : 1000;
     if (!big) { w = Math.round(w / 2); h = Math.round(h / 2); }
     return App.img(p.seed, w, h);
   }
   App.photoSrc = src;
 
-  function parseDate(p) { var a = p.date.split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
+  function parseDate(p) {
+    if (Number.isFinite(p.capturedAt)) return new Date(p.capturedAt);
+    if (p.date) { var a = p.date.split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
+    return null;
+  }
   App.photoMeta = function (p) {
     var d = parseDate(p), now = App.now();
+    if (!d || isNaN(+d)) return { date: '', monthYear: '', kicker: '', onThisDay: false, place: p.place || '', from: null };
     var years = now.getFullYear() - d.getFullYear();
     var onThisDay = d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
     var kicker = onThisDay ? years + (years === 1 ? ' year' : ' years') + ' ago today' : (years > 0 ? years + (years === 1 ? ' year ago' : ' years ago') : 'This year');
     return {
       date: App.fmt.month(d) + ' ' + d.getDate() + ', ' + d.getFullYear(),
       monthYear: App.fmt.month(d) + ' ' + d.getFullYear(),
-      kicker: kicker, onThisDay: onThisDay, place: p.place, from: App.person(p.from)
+      kicker: kicker, onThisDay: onThisDay, place: p.place || '', from: p.from ? App.person(p.from) : null
     };
   };
 
@@ -30,8 +36,11 @@
 
   function caption(ps, size) {
     var m = App.photoMeta(ps[0]);
+    if (!m.date && !m.place) return '';
+    if (ps.length > 1 && ps.some(function (p) { var other = App.photoMeta(p); return other.date !== m.date || other.place !== m.place; })) return '';
+    var kicker = [(m.onThisDay ? '<b>On this day</b> · ' : '') + m.kicker, App.esc(m.place)].filter(Boolean).join(' · ');
     return '<div class="cap cap--' + (size || 'l') + '">' +
-      '<div class="cap-kicker">' + (m.onThisDay ? '<b>On this day</b> · ' : '') + m.kicker + ' · ' + App.esc(m.place) + '</div>' +
+      '<div class="cap-kicker">' + kicker + '</div>' +
       '<div class="cap-date serif">' + (ps.length > 1 ? m.monthYear : m.date) + '</div>' +
       '</div>';
   }
@@ -59,7 +68,7 @@
       var p = ps[0], m = App.photoMeta(p), rot = (Math.random() * 5 - 2.5).toFixed(1);
       return '<div class="slide slide--polaroid"><img class="blurfill" src="' + src(p) + '" alt="">' +
         '<figure class="polaroid polaroid--' + p.o + '" style="transform:rotate(' + rot + 'deg)"><div class="polaroid-img"><img src="' + src(p, true) + '" alt=""></div>' +
-        '<figcaption class="serif"><i>' + App.esc(m.place) + ', ' + m.monthYear + '</i></figcaption></figure></div>';
+        ([m.place, m.monthYear].filter(Boolean).length ? '<figcaption class="serif"><i>' + App.esc([m.place, m.monthYear].filter(Boolean).join(', ')) + '</i></figcaption>' : '') + '</figure></div>';
     }
   };
 
@@ -71,6 +80,21 @@
     this.count = 0;
     this.timer = null;
     this.current = null;
+    this.running = false;
+    this.library = '';
+    var self = this;
+    App.on('photos', function () {
+      var signature = D.photos.map(function (p) { return p.id + ':' + p.src; }).join('|');
+      if (signature !== self.library) {
+        self.library = signature;
+        self.queue = [];
+        self.history = [];
+        if (self.current && !self.current.photos.every(function (p) {
+          return D.photos.some(function (fresh) { return fresh.id === p.id && fresh.src === p.src; });
+        })) self.current = null;
+      }
+      if (self.running && !self.current) self.next();
+    });
   };
   var S = App.Slideshow.prototype;
 
@@ -95,18 +119,19 @@
       return self.take(pred) || D.photos.filter(function (x) { return x !== first && pred(x); })[0];
     }
     if (layout === 'auto') {
-      if (first.o === 'p') layout = D.photos.some(function (x) { return x !== first && x.tag === first.tag; }) ? 'pair' : 'polaroid';
+      if (first.o === 'p') layout = D.photos.some(function (x) { return x !== first && x.o === 'p'; }) ? 'pair' : 'polaroid';
       else layout = n % 5 === 3 ? 'collage' : n % 5 === 4 ? 'polaroid' : 'cover';
     }
     var ps = [first];
     if (layout === 'pair') {
-      if (first.o !== 'p') { first = sibling(function (x) { return x.o === 'p'; }); ps = [first]; }
-      ps.push(sibling(function (x) { return x !== first && x.o === 'p' && x.tag === first.tag; }) || sibling(function (x) { return x !== first && x.o === 'p'; }));
+      if (first.o !== 'p') { first = sibling(function (x) { return x.o === 'p'; }) || first; ps = [first]; }
+      ps.push(first.o === 'p' ? sibling(function (x) { return x !== first && x.o === 'p' && x.tag === first.tag; }) || sibling(function (x) { return x !== first && x.o === 'p'; }) : null);
     }
     if (layout === 'collage') {
       ps.push(sibling(function (x) { return x !== first; }));
       ps.push(sibling(function (x) { return ps.indexOf(x) < 0; }));
     }
+    if (ps.some(function (p) { return !p; })) { layout = 'cover'; ps = [first]; }
     return { layout: layout, photos: ps };
   };
 
@@ -138,7 +163,13 @@
 
   S.next = function () {
     var s = this.pick();
-    if (!s) return;
+    if (!s) {
+      clearInterval(this.timer); this.timer = null;
+      this.current = null;
+      this.el.innerHTML = '<div class="photo-empty">' + App.esc(App.photoMessage ? App.photoMessage() : 'No photos') + '</div>';
+      if (this.o.onChange) this.o.onChange(null);
+      return;
+    }
     if (this.current) this.history.push(this.current);
     this.render(s);
     this.restart();
@@ -154,6 +185,6 @@
     clearInterval(this.timer);
     this.timer = setInterval(function () { self.next(); }, this.o.interval);
   };
-  S.start = function () { if (!this.current) this.next(); else this.restart(); };
-  S.stop = function () { clearInterval(this.timer); this.timer = null; };
+  S.start = function () { this.running = true; if (!this.current) this.next(); else this.restart(); };
+  S.stop = function () { this.running = false; clearInterval(this.timer); this.timer = null; };
 })();

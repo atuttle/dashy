@@ -97,6 +97,8 @@ public class MainActivity extends Activity {
   static final long TIME_NUDGE_MS = 60 * 1000;
 
   private WebView web;
+  private FrameData frameData;
+  private volatile boolean trustedDataPage;
   private Button menuButton;
   private Thread bootanimThread;
   private final Handler handler = new Handler(Looper.getMainLooper());
@@ -172,12 +174,14 @@ public class MainActivity extends Activity {
       cancelPageTouches();
       new AlertDialog.Builder(MainActivity.this)
           .setTitle("Home HQ")
-          .setItems(new String[] {"Open launcher", "Android settings", "Wi-Fi settings", "Reload dashboard"},
+          .setItems(new String[] {"Open launcher", "Android settings", "Wi-Fi settings", "Reload dashboard", "Configuration"},
               (dialog, which) -> {
                 if (which == 0) openLauncher();
                 else if (which == 1) startActivity(new Intent(Settings.ACTION_SETTINGS));
                 else if (which == 2) openWifiSettings();
-                else web.reload();
+                else if (which == 3) web.reload();
+                else new AlertDialog.Builder(MainActivity.this).setTitle("Private configuration")
+                    .setMessage(ConfigStore.summary(MainActivity.this)).setPositiveButton("OK", null).show();
               })
           .setNegativeButton("Back to dashboard", null).show();
     }
@@ -186,6 +190,9 @@ public class MainActivity extends Activity {
   @Override
   protected void onCreate(Bundle state) {
     super.onCreate(state);
+    // Load saved configuration on every cold start without any interactive authentication.
+    if (ConfigStore.loadAtStartup(this)) Log.i(TAG, "Private configuration loaded");
+    frameData = new FrameData(this);
     applyDebugFlag(getIntent());
     applyHomeFlag(getIntent());
     applyBootanimFlag(getIntent());
@@ -208,11 +215,17 @@ public class MainActivity extends Activity {
     web.setWebViewClient(new WebViewClient() {
       @Override
       public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
+        Uri uri = req.getUrl();
+        if (isLocal(uri) && ("/api/calendars".equals(uri.getPath()) || "/api/countdowns".equals(uri.getPath()) || "/api/travel".equals(uri.getPath()) || "/api/weather".equals(uri.getPath()) || "/api/skydiving".equals(uri.getPath())
+            || "/api/photos".equals(uri.getPath()) || (uri.getPath() != null && uri.getPath().startsWith("/api/photos/")))) {
+          return frameData.respond(uri, req.getMethod(), trustedDataPage);
+        }
         return localAsset(req.getUrl());
       }
 
       @Override
       public void onPageStarted(WebView view, String url, Bitmap icon) {
+        trustedDataPage = isLocal(Uri.parse(url));
         pageFailed = false;
         mainUrl = url;
       }
@@ -440,9 +453,13 @@ public class MainActivity extends Activity {
    * KIOSK_SITE). Any other URL returns null and goes to the network as usual. Nothing listens on
    * the port; only this WebView sees these responses. Paths ending in / get index.html.
    */
+  private static boolean isLocal(Uri u) {
+    return u != null && "http".equalsIgnoreCase(u.getScheme()) && LOCAL_HOST.equals(u.getHost())
+        && u.getPort() == LOCAL_PORT;
+  }
+
   private WebResourceResponse localAsset(Uri u) {
-    if (u == null || !"http".equalsIgnoreCase(u.getScheme()) || !LOCAL_HOST.equals(u.getHost())
-        || u.getPort() != LOCAL_PORT) return null;
+    if (!isLocal(u)) return null;
     String path = u.getPath();
     if (path == null || path.isEmpty()) path = "/";
     if (path.endsWith("/")) path += "index.html";
@@ -811,6 +828,7 @@ public class MainActivity extends Activity {
     unregisterReceiver(networkChange);
     handler.removeCallbacksAndMessages(null);
     if (web != null) web.destroy();
+    if (frameData != null) frameData.close();
     super.onDestroy();
   }
 

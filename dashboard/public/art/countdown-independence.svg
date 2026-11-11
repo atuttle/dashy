@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <path id="star" d="m0-12 3.5 7.5L12-3l-6 6 1.5 8.5L0 7.5l-7.5 4L-6 3l-6-6 8.5-1.5z"/>
+    <g id="burst" stroke-linecap="round" stroke-width="2">
+      <path d="M0-12v-30M0 12v30M-12 0h-30M12 0h30M-9-9l-21-21M9 9l21 21M-9 9l-21 21M9-9l21-21"/>
+      <circle cy="-49" r="1.5"/><circle cx="49" r="1.5"/><circle cy="49" r="1.5"/><circle cx="-49" r="1.5"/>
+    </g>
+  </defs>
+  <g stroke="#D2D9E5" opacity=".22"><use href="#burst" transform="translate(506 70) scale(1.1)"/></g>
+  <g stroke="#CA6D7C" opacity=".3"><use href="#burst" transform="translate(385 194) scale(.75)"/></g>
+  <g fill="#D2D9E5" opacity=".2">
+    <use href="#star" transform="translate(327 49) rotate(-12) scale(.7)"/>
+    <use href="#star" transform="translate(459 155) rotate(10) scale(.5)"/>
+    <use href="#star" transform="translate(560 192) rotate(13) scale(.8)"/>
+    <use href="#star" transform="translate(271 208) rotate(-9) scale(.4)"/>
+  </g>
+  <g fill="#BE6977" opacity=".23"><use href="#star" transform="translate(404 102) scale(.35)"/><use href="#star" transform="translate(579 125) scale(.4)"/></g>
+  <g stroke-linecap="round" opacity=".16">
+    <path d="M485 245c45-35 78-20 134-63" stroke="#E8E7E7" stroke-width="8"/>
+    <path d="M485 262c45-35 78-20 134-63" stroke="#D17482" stroke-width="8"/>
+  </g>
+</svg>

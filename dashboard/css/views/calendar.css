@@ -3,12 +3,15 @@
 #view-calendar { padding-top: 14px; }
 .cal-head { display: flex; align-items: center; gap: 8px; height: 52px; margin-bottom: 8px; flex: none; }
 .cal-head .icon-btn { width: 52px; height: 52px; }
+.cal-refresh .i { transform: scaleX(-1); }
+.cal-refresh:disabled { opacity: .45; cursor: wait; }
 .cal-head .fab { width: 52px; height: 52px; }
 .cal-head .btn { min-height: 52px; padding: 0 20px; font-size: 15px; }
 .cal-head .seg { padding: 3px; }
 .cal-head .seg button { min-height: 46px; padding: 0 18px; font-size: 15px; }
 .cal-title { display: flex; align-items: baseline; gap: 12px; min-width: 300px; padding: 0 6px; }
 .cal-title .serif { font-size: 34px; line-height: 1; white-space: nowrap; }
+.cal-title .label { min-width: 0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cal-head [data-today] { margin-right: auto; }
 .cal-body { flex: 1; min-height: 0; position: relative; }
 

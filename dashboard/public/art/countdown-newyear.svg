@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <g id="burst" stroke-linecap="round">
+      <path d="M0-12v-31M0 12v31M-12 0h-31M12 0h31M-9-9l-22-22M9 9l22 22M-9 9l-22 22M9-9l22-22" stroke-width="2"/>
+      <path d="m-6-15-4-10M6-15l4-10M15-6l10-4M15 6l10 4M6 15l4 10M-6 15l-4 10M-15 6l-10 4M-15-6l-10-4" stroke-width="1.5"/>
+    </g>
+  </defs>
+  <g stroke="#A8B8D0" opacity=".23">
+    <use href="#burst" transform="translate(506 76) scale(1.5)"/>
+    <use href="#burst" transform="translate(364 204) scale(.8)"/>
+  </g>
+  <g stroke="#BC9CB7" opacity=".28"><use href="#burst" transform="translate(593 211) scale(.9)"/></g>
+  <g stroke="#7F9DBE" stroke-width="3" stroke-linecap="round" opacity=".32">
+    <path d="m280 37 4 8m60 31-6 5m88 45 6-8m-37 39 7 3m143 23-4 7m-91 28-4-6M564 28q-7 3-4 10t-4 10M302 189q-8-1-8 6t-8 6"/>
+  </g>
+  <g fill="#C7A6B9" opacity=".32">
+    <path d="m384 29 5 3-5 9-5-3zm88 147 6-2 3 10-6 2zm80-56 4 4-8 8-4-4zM229 211l5 2-3 8-5-2z"/>
+    <circle cx="321" cy="133" r="2.5"/><circle cx="446" cy="33" r="2"/><circle cx="570" cy="218" r="2"/>
+  </g>
+</svg>

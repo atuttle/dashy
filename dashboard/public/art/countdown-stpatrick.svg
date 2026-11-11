@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 232" fill="none">
+  <defs>
+    <path id="petal" d="M0 2C-12-7-15-17-7-21-2-24 1-18 0-14 1-18 4-24 9-20 16-15 11-6 0 2z"/>
+    <g id="clover" fill="#6DB28A">
+      <use href="#petal"/>
+      <use href="#petal" transform="rotate(120)"/>
+      <use href="#petal" transform="rotate(240)"/>
+      <path d="M1 5c1 12 6 18 13 23" stroke="#6DB28A" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <g opacity=".25">
+    <use href="#clover" transform="translate(510 65) rotate(18) scale(1.4)"/>
+    <use href="#clover" transform="translate(363 174) rotate(-25) scale(.8)"/>
+    <use href="#clover" transform="translate(590 205) rotate(-8) scale(1.2)"/>
+    <use href="#clover" transform="translate(302 47) rotate(12) scale(.45)"/>
+  </g>
+  <g transform="translate(502 183) rotate(23)" stroke="#8BC4A0" stroke-width="4" opacity=".18">
+    <path d="M-43 0c0-25 25-25 43 0S43 25 43 0 18-25 0 0-43 25-43 0z"/>
+    <path d="M0-43c25 0 25 25 0 43S-25 43 0 43 25 18 0 0-25-43 0-43z"/>
+  </g>
+  <g fill="#A0CFAD" opacity=".2"><circle cx="412" cy="56" r="2"/><circle cx="443" cy="119" r="2.5"/><circle cx="321" cy="217" r="2"/></g>
+</svg>
