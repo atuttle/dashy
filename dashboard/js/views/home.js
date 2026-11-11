@@ -23,8 +23,6 @@ import { countdownBanner } from '../countdown-view.js';
         '<small>' + (App.weatherStatus === 'loading' ? 'Fetching your local forecast' : 'Trying again shortly') + '</small></div>';
     }
     var hours = App.hourly(7);
-    var tmin = Math.min.apply(null, hours.map(function (h) { return h.t; }));
-    var tmax = Math.max.apply(null, hours.map(function (h) { return h.t; }));
     var updated = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: WEATHER_LOCATION.timezone }).format(w.fetchedAt);
     var elapsed = WEATHER_REFRESH_MS * (1 - freshnessRemaining({ fetchedAt: w.fetchedAt, stale: w.stale }));
     var freshness = w.stale ? '' : '<span class="h-wx-freshness" aria-hidden="true" style="animation-delay:-' +
@@ -37,9 +35,8 @@ import { countdownBanner } from '../countdown-view.js';
       '<div class="h-wx-details">Feels ' + w.feels + '°F · Wind ' + w.wind + ' mph · Humidity ' + w.humidity + '%</div>' +
       '<div class="h-wx-say" title="' + App.esc(w.summary) + '">' + App.esc(w.summary) + '</div>' +
       '<div class="h-wx-hours">' + hours.map(function (h) {
-        var lift = tmax === tmin ? 0 : Math.round((h.t - tmin) / (tmax - tmin) * 8);
         return '<div class="h-hr' + (h.p >= 50 ? ' is-wet' : '') + '"><span class="h-hr-l">' + h.label + '</span>' +
-          '<span class="h-hr-i" style="transform:translateY(' + -lift + 'px)">' + App.icon(h.c, 22) + '</span><b>' + h.t + '°</b></div>';
+          '<span class="h-hr-i">' + App.icon(h.c, 22) + '</span><b>' + h.t + '°</b></div>';
       }).join('') + '</div>' +
       '<div class="h-wx-note' + (w.stale ? ' is-stale' : '') + '" title="Updated ' + updated + '">' +
       (w.stale ? 'Last update ' + updated + ' · reconnecting' : '') + '</div>' + freshness;
