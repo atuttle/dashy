@@ -258,10 +258,23 @@ are skipped. Every route starts at the configured home address. It does not trac
 anyone's current location or infer a route from the preceding appointment.
 
 TomTom Orbis Geocoding v2 resolves addresses and Routing v3 supplies traffic-aware
-driving estimates for the event's arrival time. The buffer is **drive time / 6**,
-capped at 15 minutes: a 35-minute drive gets 5 minutes 50 seconds extra. Leave-by
-subtracts both from the event start. The home hero shows Leave in/Leave now;
+driving estimates for the event's arrival time. The buffer is **5 minutes +
+min(drive time / 6, 15 minutes)**: a 35-minute drive gets 10 minutes 50 seconds
+extra, for 45 minutes 50 seconds total. The fixed five minutes are added after
+the proportional buffer's cap, giving a maximum total buffer of 20 minutes.
+Leave-by subtracts drive time and the full buffer from the event start everywhere.
+The home hero shows Leave in/Leave now;
 event details show driving time, buffer, and the TomTom source.
+
+When an Dad (personal or work) or Family event's leave-by countdown reaches five
+minutes, a full-screen reminder shows medium-blue text on black: **Leave in …**
+and the appointment title. It drifts and bounces like the night clock, without
+the DVD logo or location details. When the leave-by countdown reaches zero it
+changes to **LEAVE NOW**, and disappears five minutes after leave-by, regardless
+of event duration. Without a driving estimate, appointment start is used for
+the countdown and its five-minute grace period. All-day events and events owned
+by Mom's or Kiddo's calendars do not trigger it. Doorbell and critical alerts
+remain above the reminder; the underlying dashboard/screen-saver mode is preserved.
 
 The next four addressed events within 24 hours are checked. Routes refresh every
 30 minutes, increasing to every five minutes within two hours of departure.
@@ -316,11 +329,28 @@ album's photos. Uninstalling/clearing app data deletes the on-frame cache.
 The home tile, Photos page, and automatic photo screen saver use the same live
 photo library. Single-photo albums and empty albums are supported. After one idle
 minute, other views return to Today; after two idle minutes, the photo screen saver
-opens during the day. Tap it to return to Today.
+opens during the day. A compact clock sits at bottom-left, with the weekday and
+month/date on separate lines. Weather sits at top-left, with its description
+below the icon and temperature; a subtle left-edge shadow keeps the text readable.
+The next calendar event stays at bottom-right. Tap the screen saver to return to Today.
 
 Night mode switches on at 9:30 PM in the device's local time, including when the
 app starts during the night, and returns to the normal dashboard at 6 AM. Tap the
 night clock to use the dim dashboard; after 20 idle seconds it returns to the clock.
+The clock and its supporting text drift together at 6 pixels/second horizontally
+and 4 vertically, bouncing against the screen edges without extra margins or
+padding. The departure reminder uses the same full-screen bounds. The block fits its contents,
+wraps long event details, and adjusts its bounds when the text or screen changes.
+Motion pauses outside night mode and resumes gently after backgrounding.
+If both edges are hit at precisely the same instant, the time becomes a dim red
+DVD logo for 15 seconds. It keeps moving, preserves the clock's layout, and then
+returns to the current time. Near misses and ordinary wall bounces do not trigger it.
+The hidden clock-hold/Demo controls include **DVD corner demo**, which starts a
+normal-speed approach eight seconds from its first, guaranteed corner hit.
+The Modes section labels the photo overlay **Screen saver**. **Idle: fast** toggles
+the return-to-Today timer from 60 to 8 seconds and the screen-saver timer from 120
+to 15 seconds. Demo controls omit clock overrides, calendar-data presets, and
+keyboard shortcuts; press and hold the sidebar clock to open them.
 Scheduled changes wait for any full-screen alert to be dismissed. The optional
 public Worker does not serve the private photo routes. Building this code does not
 deploy it to the frame.

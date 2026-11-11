@@ -1,0 +1,6 @@
+/* Blue departure reminder, with the same slow edge-to-edge drift as the night clock. */
+.departure { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 67; background: #000; overflow: hidden; color: #3B82F6; }
+.departure[hidden] { display: none; }
+.dep-inner { position: absolute; top: 0; left: 0; width: max-content; max-width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; will-change: transform; }
+.dep-time { font-size: 180px; line-height: 1; letter-spacing: -.04em; white-space: nowrap; }
+.dep-title { margin-top: 24px; max-width: 880px; font-size: 48px; line-height: 1.15; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }

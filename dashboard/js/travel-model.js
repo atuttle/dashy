@@ -10,7 +10,7 @@ export function addressQuery(value) {
 }
 
 export function travelBufferSeconds(driveSeconds) {
-  return Math.min(15 * 60, driveSeconds / 6);
+  return 5 * 60 + Math.min(15 * 60, driveSeconds / 6);
 }
 
 export function travelRefreshMs(eventStart, driveSeconds, now) {

@@ -44,11 +44,18 @@ async function fixture(t, options = {}) {
   return { state, service, start: now + 3600000, now: () => now, advance: ms => { now += ms; } };
 }
 
-test('proportional buffer handles 35 minutes and caps at 15 minutes', () => {
-  assert.equal(travelBufferSeconds(35 * 60), 350);
-  assert.equal(travelBufferSeconds(30 * 60), 300);
-  assert.equal(travelBufferSeconds(90 * 60), 900);
-  assert.equal(travelBufferSeconds(180 * 60), 900);
+test('five extra minutes are added on top of the proportional buffer and its 15-minute cap', () => {
+  assert.equal(travelBufferSeconds(35 * 60), 650);
+  assert.equal(travelBufferSeconds(30 * 60), 600);
+  assert.equal(travelBufferSeconds(90 * 60), 1200);
+  assert.equal(travelBufferSeconds(180 * 60), 1200);
+});
+
+test('the extra five minutes move the frequent-refresh boundary earlier', () => {
+  const now = Date.now();
+  const start = now + 2 * 3600000 + (2100 + 650) * 1000;
+  assert.equal(travelRefreshMs(start, 2100, now - 1), 30 * 60000);
+  assert.equal(travelRefreshMs(start, 2100, now), 5 * 60000);
 });
 
 test('address filtering skips virtual meetings, named places, and PO boxes', () => {
@@ -62,7 +69,7 @@ test('real HTTP geocodes and traffic-aware arrival routing coalesce and keep cre
   const [one, two] = await Promise.all([service.snapshot(DESTINATION, start), service.snapshot(DESTINATION, start)]);
   assert.deepEqual(one, two);
   assert.equal(one.status, 'ok');
-  assert.equal(one.driveSeconds, 2100); assert.equal(one.bufferSeconds, 350);
+  assert.equal(one.driveSeconds, 2100); assert.equal(one.bufferSeconds, 650);
   assert.equal(one.nextCheckAt - now(), 300000);
   assert.equal(state.calls.length, 3);
   for (const call of state.calls) {
@@ -86,8 +93,8 @@ test('traffic rechecks reuse geocodes and account for the previous buffer', asyn
   f.advance(300001); f.state.duration = 2400;
   const result = await f.service.snapshot(DESTINATION, f.start);
   assert.equal(f.state.calls.length, 4);
-  assert.equal(f.state.calls[3].body.arrivalDateTime, new Date(f.start - 350000).toISOString());
-  assert.equal(result.driveSeconds, 2400); assert.equal(result.bufferSeconds, 400);
+  assert.equal(f.state.calls[3].body.arrivalDateTime, new Date(f.start - 650000).toISOString());
+  assert.equal(result.driveSeconds, 2400); assert.equal(result.bufferSeconds, 700);
 });
 
 test('provider failures discard departure estimates and back off without exposing error bodies', async t => {
@@ -137,8 +144,9 @@ test('route adapter enforces GET and no-store, and local estimates expire more q
   assert.equal(travelRefreshMs(f.now() + 10 * 3600000, 2100, f.now()), 30 * 60000);
 });
 
-test('browser integrates drive and buffer into leave-by and removes estimates on failure/calendar changes', async () => {
-  const handlers = {}, data = { events: [{ id: 'one', loc: DESTINATION, start: new Date(Date.now() + 3600000) }] };
+test('browser applies the full buffer to every calendar and removes estimates on failure/calendar changes', async () => {
+  const start = new Date(Date.now() + 3600000);
+  const handlers = {}, data = { events: ['dad', 'family', 'mom', 'kiddo'].map(calendar => ({ id: calendar, calendar, loc: DESTINATION, start })) };
   let status = 'ok'; let interval;
   const context = vm.createContext({ URLSearchParams, AbortSignal, Date, Map, Set, addressQuery, travelKey, usableTravel, travelBufferSeconds, TRAVEL_HORIZON_MS,
     DATA: data, setInterval: callback => { interval = callback; }, addEventListener() {},
@@ -148,9 +156,11 @@ test('browser integrates drive and buffer into leave-by and removes estimates on
   context.window = context;
   vm.runInContext(readFileSync(new URL('../js/travel.js', import.meta.url), 'utf8').replace(/^import .*;\n/, ''), context);
   handlers.ready(); await handlers.calendars();
-  assert.equal(data.events[0].driveMinutes, 35);
-  assert.equal(data.events[0].bufferMinutes, 350 / 60);
-  assert.equal(data.events[0].travel, 35 + 350 / 60);
+  for (const event of data.events) {
+    assert.equal(event.driveMinutes, 35);
+    assert.equal(event.bufferMinutes, 650 / 60);
+    assert.equal(event.travel, 35 + 650 / 60);
+  }
   const old = data.events[0];
   data.events = [{ ...old, loc: 'Office' }]; await interval();
   assert.equal(data.events[0].travel, undefined);

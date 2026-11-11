@@ -96,8 +96,10 @@ Optional private config: `"travel": {"provider": "tomtom", "apiKey": "your-key",
 Generate it from `TOMTOM_API_KEY` and `DASHY_HOME_ADDRESS` in ignored `.env.local`.
 Native `TravelData` geocodes street addresses and supplies traffic-aware driving
 times to `/api/travel`. Both credentials and home details remain outside the
-WebView/APK. Routes always start at home. The shared browser code adds drive/6
-buffer, capped at 15 minutes, and drives the existing leave-by indicators.
+WebView/APK. Routes always start at home. The shared browser code adds five
+minutes plus the drive/6 buffer (that proportional part is capped at 15 minutes).
+The full buffer applies to every leave-by indicator and event detail. Native
+route refreshes use the same buffer when scheduling checks and arrival times.
 
 Routes check every 30 minutes, or five minutes within two hours of departure;
 failures remove the estimate and retry after five minutes. Caches stay in memory.
@@ -405,9 +407,8 @@ adb shell am start -n com.wesbos.homehq/.MainActivity
 Seen on an Android 6 Runxion (WebView 107). Changing the zone in Android Settings has not been
 compared.
 
-The hosted demo sets its own clock to 3:18 PM each time it loads (`App.setTime(15, 18)` in
-`dashboard/js/app.js`), so it can show the wrong time on a frame whose clock is right. Press and
-hold the sidebar clock, then tap **Real time** in Demo controls.
+The bundled dashboard uses the frame's real clock on startup. Demo controls no
+longer include a time-of-day override.
 
 ## Build and install
 

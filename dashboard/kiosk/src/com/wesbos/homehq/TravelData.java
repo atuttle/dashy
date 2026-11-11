@@ -32,7 +32,7 @@ class TravelData {
     return match.find() ? text.substring(match.start()) : null;
   }
 
-  static double bufferSeconds(double duration) { return Math.min(900, duration / 6); }
+  static double bufferSeconds(double duration) { return 300 + Math.min(900, duration / 6); }
 
   synchronized JSONObject snapshot(JSONObject settings, String destination, String startText) throws Exception {
     if (settings == null || !"tomtom".equals(settings.optString("provider"))) return new JSONObject().put("status", "unconfigured");
