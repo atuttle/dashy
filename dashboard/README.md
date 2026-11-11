@@ -303,10 +303,17 @@ the app's private no-backup directory, outside the APK and ordinary Android back
 The cache is isolated by album, so changing the link never displays a previous
 album's photos. Uninstalling/clearing app data deletes the on-frame cache.
 
-The existing home tile, Photos page, and manual ambient mode use the same live
-photo library. Single-photo albums and empty albums are supported. Automatic
-screensaver switching remains disabled. The optional public Worker does not serve
-the private photo routes. Building this code does not deploy it to the frame.
+The home tile, Photos page, and automatic photo screen saver use the same live
+photo library. Single-photo albums and empty albums are supported. After one idle
+minute, other views return to Today; after two idle minutes, the photo screen saver
+opens during the day. Tap it to return to Today.
+
+Night mode switches on at 9:30 PM in the device's local time, including when the
+app starts during the night, and returns to the normal dashboard at 6 AM. Tap the
+night clock to use the dim dashboard; after 20 idle seconds it returns to the clock.
+Scheduled changes wait for any full-screen alert to be dismissed. The optional
+public Worker does not serve the private photo routes. Building this code does not
+deploy it to the frame.
 
 ## Verification
 

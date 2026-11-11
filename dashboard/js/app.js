@@ -26,7 +26,7 @@ import { currentWeather, hourlyForecast } from './weather-model.js';
   App.dayStart = function (d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
   App.addDays = function (d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; };
   App.sameDay = function (a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
-  App.isNight = function () { var h = App.now().getHours(); return h >= 22 || h < 6; };
+  App.isNight = function () { var n = App.now(), minutes = n.getHours() * 60 + n.getMinutes(); return minutes >= 21 * 60 + 30 || minutes < 6 * 60; };
 
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -273,15 +273,33 @@ import { currentWeather, hourlyForecast } from './weather-model.js';
     App.emit('mode', m);
   };
 
+  // Apply each local-time boundary once, so tapping the night clock can still open the dashboard.
+  // Wait for ready handlers to create the overlays and slideshow before switching modes.
+  var modesReady = false, lastNight = null;
+  function syncNightMode() {
+    if (!modesReady) return;
+    var night = App.isNight();
+    if (night === lastNight || $('#takeover').classList.contains('is-open')) return;
+    lastNight = night;
+    if (night) {
+      App.closeSheet();
+      App.go('home');
+      App.setMode('night');
+    } else if (App.mode === 'night' || App.mode === 'nightdash') {
+      App.setMode('day');
+    }
+  }
+
   // ------------------------------------------------------------ idle
-  App.idle = { enabled: false, home: 60, ambient: 120 };
+  App.idle = { enabled: true, home: 60, ambient: 120 };
   var idleSec = 0;
   function onIdleTick() {
     if (!App.idle.enabled) return;
     idleSec++;
     var blocked = $('#takeover').classList.contains('is-open');
+    if (blocked) return;
     if (App.mode === 'nightdash' && idleSec >= 20) { App.setMode('night'); return; }
-    if (App.mode !== 'day' || blocked) return;
+    if (App.mode !== 'day') return;
     if (idleSec === App.idle.home && App.current !== 'home') { App.closeSheet(); App.go('home'); }
     if (idleSec >= App.idle.ambient) {
       App.closeSheet();
@@ -313,6 +331,7 @@ import { currentWeather, hourlyForecast } from './weather-model.js';
       $('#railClock').innerHTML = '<b>' + App.fmt.time(n, false) + '</b><span>' + App.fmt.ampm(n) + '</span>';
       App.emit('minute', n);
     }
+    syncNightMode();
     onIdleTick();
   }
 
@@ -337,6 +356,8 @@ import { currentWeather, hourlyForecast } from './weather-model.js';
     tick();
     setInterval(tick, 1000);
     App.emit('ready');
+    modesReady = true;
+    syncNightMode();
     refreshStale(1500);
     setTimeout(function () { App.toast('Tip: press and hold the <b>clock</b> in the sidebar for demo controls', { ms: 6000, icon: 'bolt' }); }, 1200);
   };
