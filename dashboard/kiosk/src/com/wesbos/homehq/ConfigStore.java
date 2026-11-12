@@ -37,6 +37,15 @@ final class ConfigStore {
         .decode(ByteBuffer.wrap(bytes)).toString();
     JSONObject config = new JSONObject(text);
     if (config.getInt("version") != 1) throw new IOException("Unsupported config version");
+    if (config.has("people")) {
+      JSONObject people = config.getJSONObject("people");
+      for (String id : new String[]{"dad", "mom", "kiddo", "family"}) {
+        if (people.has(id)) {
+          String name = string(people, id);
+          if (name.length() > 80 || name.matches("(?s).*[\\x00-\\x1f<>\"&].*")) throw new IOException("Invalid household name");
+        }
+      }
+    }
     JSONArray calendars = config.getJSONArray("calendars");
     if (calendars.length() > 32) throw new IOException("Too many calendar feeds");
     Set<String> ids = new HashSet<>();
@@ -63,6 +72,15 @@ final class ConfigStore {
         throw new IOException("Invalid coordinates");
       }
       if (!"us".equals(string(weather, "units"))) throw new IOException("Unsupported units");
+      for (String key : new String[]{"name", "postalCode", "timezone"}) {
+        if (weather.has(key)) {
+          String value = string(weather, key);
+          if (value.length() > 100 || value.matches("(?s).*[\\x00-\\x1f].*")) throw new IOException("Invalid weather setting");
+        }
+      }
+      if (weather.has("timezone") && !java.util.Arrays.asList(java.util.TimeZone.getAvailableIDs()).contains(weather.getString("timezone"))) {
+        throw new IOException("Invalid weather timezone");
+      }
     }
     if (config.has("photos")) PhotoData.validateAlbumUrl(string(config.getJSONObject("photos"), "albumUrl"));
     if (config.has("countdowns")) {

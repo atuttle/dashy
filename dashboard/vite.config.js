@@ -1,4 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
+import { existsSync, readFileSync } from 'node:fs';
+import { configResponse, displayConfig, runtimeConfig } from './server/config.js';
 import { createWeatherService, weatherResponse } from './server/weather.js';
 import { createCalendarService, calendarResponse } from './server/calendars.js';
 import { createSkydivingService, skydivingResponse } from './server/skydiving.js';
@@ -7,17 +9,28 @@ import { createTravelService, travelResponse } from './server/travel.js';
 import { createCountdownService, countdownResponse } from './server/countdowns.js';
 
 function weatherApi(env) {
-  const service = createWeatherService({ apiKey: env.PIRATE_WEATHER_API_KEY });
-  const feeds = [['dad-personal', 'dad', 'ICAL_DAD_PERSONAL_URL'], ['dad-work', 'dad', 'ICAL_DAD_WORK_URL'], ['mom', 'mom', 'ICAL_MOM_URL'], ['kiddo', 'kiddo', 'ICAL_KIDDO_URL'], ['family', 'family', 'ICAL_FAMILY_URL']]
-    .filter(([, , key]) => env[key]).map(([id, calendar, key]) => ({ id, name: id, calendar, url: env[key] }));
-  const calendars = createCalendarService(feeds);
-  const skydiving = createSkydivingService({ apiKey: env.PIRATE_WEATHER_API_KEY });
-  const photos = createPhotoService({ albumUrl: env.GOOGLE_PHOTOS_ALBUM_URL, cacheDir: new URL('./.cache/photos', import.meta.url).pathname });
-  const travel = createTravelService({ apiKey: env.TOMTOM_API_KEY, homeAddress: env.DASHY_HOME_ADDRESS });
-  const countdowns = createCountdownService({ url: env.ICAL_COUNTDOWNS_URL, cacheDir: new URL('./.cache/countdowns', import.meta.url).pathname });
+  const file = new URL('./config.json', import.meta.url);
+  let privateConfig = {};
+  if (existsSync(file)) {
+    try { privateConfig = JSON.parse(readFileSync(file, 'utf8')); }
+    catch { throw new Error('Could not read private config.json'); }
+  }
+  const config = runtimeConfig(privateConfig, env);
+  const service = createWeatherService({ apiKey: config.weather.apiKey, location: displayConfig(config).weather });
+  const calendars = createCalendarService(config.calendars);
+  const skydiving = createSkydivingService({ apiKey: config.weather.apiKey });
+  const photos = createPhotoService({ albumUrl: config.photos.albumUrl, cacheDir: new URL('./.cache/photos', import.meta.url).pathname });
+  const travel = createTravelService(config.travel);
+  const countdowns = createCountdownService({ url: config.countdowns.url, cacheDir: new URL('./.cache/countdowns', import.meta.url).pathname });
   const install = server => {
     server.middlewares.use(async (req, res, next) => {
       const path = req.url.split('?')[0];
+      if (path === '/api/config') {
+        const response = configResponse(new Request('http://localhost/api/config', { method: req.method }), config);
+        res.writeHead(response.status, Object.fromEntries(response.headers));
+        res.end(await response.text());
+        return;
+      }
       if (path === '/api/countdowns') {
         const response = await countdownResponse(new Request('http://' + req.headers.host + '/api/countdowns', { method: req.method,
           headers: { ...(req.headers.origin ? { Origin: req.headers.origin } : {}), ...(req.headers['sec-fetch-site'] ? { 'Sec-Fetch-Site': req.headers['sec-fetch-site'] } : {}) } }), countdowns);
@@ -76,6 +89,6 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     host: 'localhost',
-    fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/config.local.json', '**/.cache/**'] },
+    fs: { deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/config.json', '**/config.local.json', '**/.cache/**'] },
   },
 }));

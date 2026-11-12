@@ -44,9 +44,10 @@ class ConfigTests(unittest.TestCase):
     def test_generation_is_private_and_never_prints_secrets(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            env, output = root / ".env.local", root / "config.local.json"
+            env, output = root / ".env.local", root / "config.json"
             values = {key: json.dumps("https://example.com/secret-" + id_ + ".ics") for id_, _, _, key in config_tool.FEEDS}
             values["PIRATE_WEATHER_API_KEY"] = "secret-weather-key"
+            values.update({"DASHY_WEATHER_LATITUDE": "40.7128", "DASHY_WEATHER_LONGITUDE": "-74.0060"})
             values["TOMTOM_API_KEY"] = "secret-tomtom-key"
             values["DASHY_HOME_ADDRESS"] = "123 Example Street, New York, NY 10001"
             values["ICAL_COUNTDOWNS_URL"] = "https://example.com/secret-countdowns.ics"
@@ -71,10 +72,11 @@ class ConfigTests(unittest.TestCase):
     def test_invalid_replacement_preserves_local_config(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            env, output = root / ".env.local", root / "config.local.json"
+            env, output = root / ".env.local", root / "config.json"
             output.write_bytes(EXAMPLE.read_bytes())
             values = {key: "https://example.com/" + id_ + ".ics" for id_, _, _, key in config_tool.FEEDS}
             values["PIRATE_WEATHER_API_KEY"] = "secret-weather-key"
+            values.update({"DASHY_WEATHER_LATITUDE": "40.7128", "DASHY_WEATHER_LONGITUDE": "-74.0060"})
             values["ICAL_FAMILY_URL"] = "not-a-url"
             env.write_text("\n".join(key + "=" + value for key, value in values.items()))
             original = output.read_bytes()

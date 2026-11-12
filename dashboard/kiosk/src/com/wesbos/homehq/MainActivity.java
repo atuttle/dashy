@@ -216,7 +216,7 @@ public class MainActivity extends Activity {
       @Override
       public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
         Uri uri = req.getUrl();
-        if (isLocal(uri) && ("/api/calendars".equals(uri.getPath()) || "/api/countdowns".equals(uri.getPath()) || "/api/travel".equals(uri.getPath()) || "/api/weather".equals(uri.getPath()) || "/api/skydiving".equals(uri.getPath())
+        if (isLocal(uri) && ("/api/config".equals(uri.getPath()) || "/api/calendars".equals(uri.getPath()) || "/api/countdowns".equals(uri.getPath()) || "/api/travel".equals(uri.getPath()) || "/api/weather".equals(uri.getPath()) || "/api/skydiving".equals(uri.getPath())
             || "/api/photos".equals(uri.getPath()) || (uri.getPath() != null && uri.getPath().startsWith("/api/photos/")))) {
           return frameData.respond(uri, req.getMethod(), trustedDataPage);
         }

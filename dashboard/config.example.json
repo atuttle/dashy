@@ -1,12 +1,16 @@
 {
   "version": 1,
+  "people": { "dad": "Dad", "mom": "Mom", "kiddo": "Kiddo", "family": "Family" },
   "countdowns": { "url": "https://example.com/countdowns.ics" },
   "travel": { "provider": "tomtom", "homeAddress": "123 Example Street, New York, NY 10001", "apiKey": "replace-with-your-tomtom-key" },
   "photos": { "albumUrl": "https://photos.app.goo.gl/replace-with-your-album-link" },
   "weather": {
     "apiKey": "replace-with-your-pirate-weather-key",
+    "name": "New York, NY",
+    "postalCode": "10001",
+    "timezone": "America/New_York",
     "latitude": 40.7128,
-    "longitude": -74.006,
+    "longitude": -74.0060,
     "units": "us"
   },
   "calendars": [

@@ -7,7 +7,7 @@ import vm from 'node:vm';
 import { createWeatherService, normalizeForecast, weatherResponse } from '../server/weather.js';
 import { currentWeather, hourlyForecast, freshnessRemaining } from '../js/weather-model.js';
 import { WEATHER_REFRESH_MS, WEATHER_MAX_AGE_MS } from '../js/weather-config.js';
-import { WEATHER_LOCATION } from '../js/weather-config.js';
+const WEATHER_LOCATION = { name: 'New York, NY', postalCode: '10001', latitude: 40.7128, longitude: -74.006, timezone: 'America/New_York' };
 import worker from '../server/worker.js';
 
 // 11:30 PM in New York: the forecast must continue into the following day.
@@ -59,7 +59,7 @@ after(async () => {
 });
 
 function service(options = {}) {
-  return createWeatherService({ apiKey: 'test-weather-key', origin, now: () => NOW, ...options });
+  return createWeatherService({ apiKey: 'test-weather-key', location: WEATHER_LOCATION, origin, now: () => NOW, ...options });
 }
 const request = () => new Request('http://dashy.local/api/weather');
 
@@ -133,14 +133,14 @@ test('missing configuration and unsupported methods make no provider request', a
 test('unexpected units and invalid temperatures are rejected instead of mislabeled', () => {
   const metric = fixture();
   metric.flags.units = 'si';
-  assert.throws(() => normalizeForecast(metric, NOW));
+  assert.throws(() => normalizeForecast(metric, NOW, WEATHER_LOCATION));
   const missing = fixture();
   missing.currently.temperature = null;
-  assert.throws(() => normalizeForecast(missing, NOW));
+  assert.throws(() => normalizeForecast(missing, NOW, WEATHER_LOCATION));
 });
 
 test('hourly display crosses midnight using tomorrow’s data and New York’s timezone', () => {
-  const weather = normalizeForecast(fixture(), NOW);
+  const weather = normalizeForecast(fixture(), NOW, WEATHER_LOCATION);
   const hours = hourlyForecast(weather, 7, NOW);
   assert.equal(hours.length, 7);
   assert.equal(hours[0].label, 'Now');
@@ -154,14 +154,14 @@ test('hourly display crosses midnight using tomorrow’s data and New York’s t
 test('missing or expired data never falls back to sample weather', () => {
   assert.equal(currentWeather(null, 'loading', NOW).label, 'Loading weather…');
   assert.equal(currentWeather(null, 'error', NOW).temp, '—');
-  const weather = normalizeForecast(fixture(), NOW);
+  const weather = normalizeForecast(fixture(), NOW, WEATHER_LOCATION);
   assert.equal(currentWeather(weather, 'ready', NOW).available, true);
   assert.equal(currentWeather(weather, 'error', NOW).stale, true);
   assert.equal(currentWeather(weather, 'ready', NOW + WEATHER_MAX_AGE_MS).available, false);
 });
 
 test('freshness countdown starts full, reaches half at 7.5 minutes, and empties at 15 minutes', () => {
-  const weather = normalizeForecast(fixture(), NOW);
+  const weather = normalizeForecast(fixture(), NOW, WEATHER_LOCATION);
   assert.equal(freshnessRemaining(weather, NOW), 1);
   assert.equal(freshnessRemaining(weather, NOW + WEATHER_REFRESH_MS / 2), 0.5);
   assert.equal(freshnessRemaining(weather, NOW + WEATHER_REFRESH_MS), 0);
@@ -170,7 +170,7 @@ test('freshness countdown starts full, reaches half at 7.5 minutes, and empties 
 });
 
 test('browser resumes saved freshness and schedules refresh from fetch time, not page load', async () => {
-  const cached = normalizeForecast(fixture(), NOW - WEATHER_REFRESH_MS / 2);
+  const cached = normalizeForecast(fixture(), NOW - WEATHER_REFRESH_MS / 2, WEATHER_LOCATION);
   const timers = new Map();
   const listeners = {};
   const App = { on: (name, fn) => { listeners[name] = fn; }, emit: () => {} };

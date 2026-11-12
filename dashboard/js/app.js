@@ -361,5 +361,7 @@ import { currentWeather, hourlyForecast } from './weather-model.js';
     refreshStale(1500);
     setTimeout(function () { App.toast('Tip: press and hold the <b>clock</b> in the sidebar for demo controls', { ms: 6000, icon: 'bolt' }); }, 1200);
   };
-  document.addEventListener('DOMContentLoaded', function () { App.start(); });
+  document.addEventListener('DOMContentLoaded', function () {
+    Promise.resolve(App.configReady).then(function () { App.start(); });
+  });
 })();

@@ -1,4 +1,4 @@
-import { WEATHER_LOCATION, WEATHER_REFRESH_MS, WEATHER_MAX_AGE_MS } from '../js/weather-config.js';
+import { WEATHER_LOCATION, weatherLocation, WEATHER_REFRESH_MS, WEATHER_MAX_AGE_MS } from '../js/weather-config.js';
 
 function requiredNumber(value) {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error('Invalid forecast');
@@ -10,8 +10,8 @@ function optionalNumber(value) {
 }
 
 // Expose only display data, never provider credentials, headers, or error bodies.
-export function normalizeForecast(data, fetchedAt) {
-  if (data.flags?.units !== 'us' || data.timezone !== WEATHER_LOCATION.timezone) {
+export function normalizeForecast(data, fetchedAt, location = WEATHER_LOCATION) {
+  if (data.flags?.units !== 'us' || data.timezone !== location.timezone) {
     throw new Error('Unexpected forecast units or location');
   }
   const current = data.currently;
@@ -26,7 +26,7 @@ export function normalizeForecast(data, fetchedAt) {
   });
   return {
     source: 'Pirate Weather',
-    location: WEATHER_LOCATION,
+    location: weatherLocation(location),
     units: { temperature: 'F', wind: 'mph' },
     fetchedAt,
     current: {
@@ -43,7 +43,7 @@ export function normalizeForecast(data, fetchedAt) {
   };
 }
 
-export function createWeatherService({ apiKey, fetchImpl = fetch, now = Date.now,
+export function createWeatherService({ apiKey, location = WEATHER_LOCATION, fetchImpl = fetch, now = Date.now,
   origin = 'https://api.pirateweather.net', timeoutMs = 8000 } = {}) {
   let cached = null;
   let pending = null;
@@ -57,14 +57,14 @@ export function createWeatherService({ apiKey, fetchImpl = fetch, now = Date.now
   async function refresh() {
     try {
       // Pirate supports header authentication with a dummy URL key, keeping secrets out of URLs.
-      const url = new URL(`${origin}/forecast/dashy/${WEATHER_LOCATION.latitude},${WEATHER_LOCATION.longitude}`);
+      const url = new URL(`${origin}/forecast/dashy/${location.latitude},${location.longitude}`);
       url.searchParams.set('units', 'us');
       url.searchParams.set('exclude', 'minutely,alerts');
       const signal = AbortSignal.timeout(timeoutMs);
       const response = await fetchImpl(url, { headers: { apikey: apiKey }, signal });
       if (!response.ok) throw new Error('Weather provider unavailable');
       // Keep the timeout active while reading/parsing the response body too.
-      cached = normalizeForecast(await response.json(), now());
+      cached = normalizeForecast(await response.json(), now(), location);
       retryAfter = 0;
       return { ...cached, stale: false };
     } catch {
@@ -75,7 +75,7 @@ export function createWeatherService({ apiKey, fetchImpl = fetch, now = Date.now
 
   return {
     async forecast() {
-      if (!apiKey) throw new Error('Weather not configured');
+      if (!apiKey || !Number.isFinite(location.latitude) || !Number.isFinite(location.longitude)) throw new Error('Weather not configured');
       if (cached && now() - cached.fetchedAt < WEATHER_REFRESH_MS && !retryAfter) {
         return { ...cached, stale: false };
       }

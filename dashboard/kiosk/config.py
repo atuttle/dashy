@@ -13,10 +13,11 @@ import sys
 import tempfile
 import time
 from urllib.parse import urlsplit
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 DASHBOARD = Path(__file__).resolve().parents[1]
 REPO = DASHBOARD.parent
-DEFAULT_CONFIG = DASHBOARD / "config.local.json"
+DEFAULT_CONFIG = DASHBOARD / "config.json"
 AUTHORITY = "content://com.wesbos.homehq.config"
 MAX_BYTES = 65536
 FEEDS = (
@@ -41,6 +42,14 @@ def validate(payload):
             raise ValueError()
         if len(config["calendars"]) > 32:
             raise ValueError()
+        if "people" in config:
+            if not isinstance(config["people"], dict):
+                raise ValueError()
+            for id_ in ("dad", "mom", "kiddo", "family"):
+                name = config["people"].get(id_)
+                if name is not None and (not isinstance(name, str) or not name.strip() or len(name) > 80
+                                         or re.search(r'[\x00-\x1f<>"&]', name)):
+                    raise ValueError()
         ids = set()
         for feed in config["calendars"]:
             if not isinstance(feed["id"], str) or not re.fullmatch(r"[a-z][a-z0-9-]{0,63}", feed["id"]):
@@ -64,6 +73,12 @@ def validate(payload):
                     raise ValueError()
             if weather["units"] != "us":
                 raise ValueError()
+            for key in ("name", "postalCode", "timezone"):
+                if key in weather and (not isinstance(weather[key], str) or not weather[key].strip()
+                                       or len(weather[key]) > 100 or re.search(r"[\x00-\x1f]", weather[key])):
+                    raise ValueError()
+            if "timezone" in weather:
+                ZoneInfo(weather["timezone"])
         if "travel" in config:
             travel = config["travel"]
             if travel["provider"] != "tomtom":
@@ -96,7 +111,7 @@ def validate(payload):
             if url.scheme != "https" or not url.hostname or url.username is not None or url.fragment:
                 raise ValueError()
         return config
-    except (ValueError, KeyError, TypeError, AttributeError):
+    except (ValueError, KeyError, TypeError, AttributeError, ZoneInfoNotFoundError):
         raise ConfigError("Invalid configuration. Check the format against config.example.json.") from None
 
 
@@ -123,14 +138,24 @@ def create_config(env_path, output, force=False):
     if output.exists() and not force:
         raise ConfigError("Config already exists. Use --force to replace it.")
     env = read_env(env_path)
-    missing = [name for name in ["PIRATE_WEATHER_API_KEY", *(feed[3] for feed in FEEDS)] if not env.get(name)]
+    missing = [name for name in ["PIRATE_WEATHER_API_KEY", "DASHY_WEATHER_LATITUDE", "DASHY_WEATHER_LONGITUDE", *(feed[3] for feed in FEEDS)] if not env.get(name)]
     if missing:
         raise ConfigError("Missing local settings: " + ", ".join(missing))
+    try:
+        latitude, longitude = float(env["DASHY_WEATHER_LATITUDE"]), float(env["DASHY_WEATHER_LONGITUDE"])
+    except ValueError:
+        raise ConfigError("Invalid weather coordinates in local settings.") from None
     config = {
         "version": 1,
-        "weather": {"apiKey": env["PIRATE_WEATHER_API_KEY"], "latitude": 40.7128, "longitude": -74.006, "units": "us"},
+        "people": {id_: env.get("DASHY_" + id_.upper() + "_NAME", label)
+                   for id_, label in (("dad", "Dad"), ("mom", "Mom"), ("kiddo", "Kiddo"), ("family", "Family"))},
+        "weather": {"apiKey": env["PIRATE_WEATHER_API_KEY"], "latitude": latitude, "longitude": longitude,
+                    "name": env.get("DASHY_WEATHER_NAME", "Local weather"),
+                    "timezone": env.get("DASHY_WEATHER_TIMEZONE", "America/New_York"), "units": "us"},
         "calendars": [{"id": id_, "calendar": owner, "name": name, "url": env[key]} for id_, owner, name, key in FEEDS],
     }
+    if env.get("DASHY_WEATHER_POSTAL_CODE"):
+        config["weather"]["postalCode"] = env["DASHY_WEATHER_POSTAL_CODE"]
     if env.get("GOOGLE_PHOTOS_ALBUM_URL"):
         config["photos"] = {"albumUrl": env["GOOGLE_PHOTOS_ALBUM_URL"]}
     if env.get("DASHY_HOME_ADDRESS") or env.get("TOMTOM_API_KEY"):

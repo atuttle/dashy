@@ -9,17 +9,27 @@ From this directory, run `npm ci`, then `npm run dev`. Open the localhost URL Vi
 prints. The development server handles `GET /api/weather` and `GET /api/calendars`
 and binds to localhost because calendar responses contain private event details.
 
-Develop and verify changes locally. Install updates on the frame only when Dad
+Develop and verify changes locally. Install updates on the frame only when the owner
 explicitly requests it; local edits and builds do not authorize a device update.
 
-Copy `.env.example` to `.env.local` and set `PIRATE_WEATHER_API_KEY`. The key is
-server-only: do not prefix it with `VITE_`, put it in JavaScript, or commit it.
-`.env.local` is ignored. Restart Vite after changing the key.
+Copy `config.example.json` to ignored `config.json` and replace its placeholders.
+This private file contains `people` display names, weather name/coordinates/timezone,
+keys, calendar URLs, album URL, and home address. Restart Vite after editing it.
+The stable IDs are `dad`, `mom`, `kiddo`, and `family`; changing a display name does
+not change calendar ownership. Missing names use Dad, Mom, Kiddo, and Family.
+
+The localhost server and Android wrapper expose only allowlisted names and location
+through `GET /api/config`. Keys, feed URLs, album URLs, and the home address stay
+server/native-only. The JSON file is blocked by Vite and never bundled into `dist/`.
+`.env.local` remains an ignored alternative: see `.env.example` for generic setting
+names, including required weather coordinates. `config.json` takes precedence.
+Never prefix private settings with `VITE_` or put them in JavaScript.
 
 ## Live weather
 
-The location and refresh interval are in `js/weather-config.js`. The initial
-location is New York, NY 10001, at 40.7128, -74.006. Pirate Weather is requested
+The private `weather` configuration supplies the location. No household name or
+coordinates are hardcoded in the app; without configuration, weather is unavailable.
+Refresh intervals are in `js/weather-config.js`. Pirate Weather is requested
 with `units=us`, so temperatures are Fahrenheit and wind speeds are mph.
 
 `GET /api/weather` returns only normalized display data: source, location, units,
@@ -50,7 +60,7 @@ removed and the photo tile fills the remaining space beneath the compact countdo
 ## Weekend skydiving
 
 `GET /api/skydiving` provides two independent sources for KMDT (Harrisburg), not the
-New York location used by the main weather pod:
+privately configured location used by the main weather pod:
 
 - Aviation: the embedded forecast JSON and sky-condition labels from the
   [USAirNet page](https://www.usairnet.com/cgi-bin/launch/code.cgi?state=PA&sta=KMDT).
@@ -237,7 +247,7 @@ private endpoint. Local builds do not install on the frame or import its config.
 ## Driving times
 
 Set `TOMTOM_API_KEY` and `DASHY_HOME_ADDRESS` in ignored `.env.local` for laptop
-development. The optional `travel` section in `config.local.json` stores the same
+development. The optional `travel` section in `config.json` stores the same
 settings for the frame, using `provider: "tomtom"`, `apiKey`, and `homeAddress`.
 Both values remain in server/native code; neither enters JavaScript assets or the
 APK. Existing weather/calendar/photo settings are preserved when adding travel.
@@ -326,7 +336,7 @@ does not contact Pirate Weather. `npm run build` creates the static site in `dis
 
 ### On-frame secret storage
 
-Home HQ now supports importing `config.local.json` directly into Android's private
+Home HQ now supports importing `config.json` directly into Android's private
 app storage over USB. It reads this file automatically after startup, independently
 of your laptop. See [private configuration over USB](kiosk/README.md#private-configuration-over-usb).
 The real file is ignored by Git and blocked by the Vite development server;
@@ -341,8 +351,10 @@ frame operates independently of the laptop and does not require hosting.
 ### Optional hosted deployment
 
 The Cloudflare Worker in `server/worker.js` serves the same weather route beside
-the static site. Before deploying, configure the `PIRATE_WEATHER_API_KEY` Worker
-secret; the local `.env.local` file is not uploaded as a production secret.
+the static site. Before deploying, set the `DASHY_CONFIG` Worker secret to your
+private JSON configuration (`wrangler secret put DASHY_CONFIG < config.json`).
+Local configuration is never uploaded by a build. Separate environment settings
+from `.env.example` also work when configured as Worker secrets.
 The cache is per running server/Worker instance, not a global rate limiter.
 The optional public Worker does not expose the private calendar feeds.
 

@@ -36,6 +36,7 @@ final class FrameData {
   private final CountdownData countdowns;
   private final PhotoData photos;
   private JSONObject weather;
+  private String weatherSettings;
   private long weatherAttempt;
   private boolean weatherError;
 
@@ -51,7 +52,8 @@ final class FrameData {
       String path = uri.getPath();
       if (path.equals("/api/photos") || path.startsWith("/api/photos/")) return photos.respond(path, config.optJSONObject("photos"));
       JSONObject value;
-      if (path.equals("/api/calendars")) value = calendars(config.getJSONArray("calendars"), "POST".equals(method));
+      if (path.equals("/api/config")) value = displayConfig(config);
+      else if (path.equals("/api/calendars")) value = calendars(config.getJSONArray("calendars"), "POST".equals(method));
       else if (path.equals("/api/countdowns")) value = countdowns.snapshot(config.optJSONObject("countdowns"), "POST".equals(method));
       else if (path.equals("/api/travel")) value = travel.snapshot(config.optJSONObject("travel"), uri.getQueryParameter("destination"), uri.getQueryParameter("eventStart"));
       else if (path.equals("/api/skydiving")) value = skydiving.snapshot(config.has("weather") ? config.getJSONObject("weather").optString("apiKey", null) : null);
@@ -61,6 +63,19 @@ final class FrameData {
       // Network and JSON errors may contain private URLs or keys. Never log their details.
       return response(503, "Service Unavailable", "{\"error\":\"Data unavailable. Retrying shortly.\"}");
     }
+  }
+
+  private static JSONObject displayConfig(JSONObject config) throws Exception {
+    JSONObject names = config.optJSONObject("people"), people = new JSONObject();
+    String[] ids = {"dad", "mom", "kiddo", "family"}, labels = {"Dad", "Mom", "Kiddo", "Family"};
+    for (int i = 0; i < ids.length; i++) people.put(ids[i], names == null ? labels[i] : names.optString(ids[i], labels[i]));
+    JSONObject settings = config.optJSONObject("weather"), location = new JSONObject();
+    location.put("name", settings == null ? "Local weather" : settings.optString("name", "Local weather"))
+        .put("timezone", settings == null ? "America/New_York" : settings.optString("timezone", "America/New_York"))
+        .put("postalCode", settings == null ? "" : settings.optString("postalCode", ""))
+        .put("latitude", settings == null ? JSONObject.NULL : settings.getDouble("latitude"))
+        .put("longitude", settings == null ? JSONObject.NULL : settings.getDouble("longitude"));
+    return new JSONObject().put("people", people).put("weather", location);
   }
 
   private static WebResourceResponse response(int status, String reason, String body) {
@@ -187,6 +202,9 @@ final class FrameData {
   }
 
   private synchronized JSONObject forecast(JSONObject settings) throws Exception {
+    if (!settings.toString().equals(weatherSettings)) {
+      weatherSettings = settings.toString(); weather = null; weatherAttempt = 0; weatherError = false;
+    }
     long now = System.currentTimeMillis();
     if (now - weatherAttempt >= (weatherError ? 60000 : REFRESH_MS)) {
       weatherAttempt = now;
@@ -201,8 +219,9 @@ final class FrameData {
         if (data.length() == 0) throw new IOException("Incomplete weather");
         for (int i = 0; i < Math.min(48, data.length()); i++) hours.put(point(data.getJSONObject(i)));
         weather = new JSONObject().put("source", "Pirate Weather").put("fetchedAt", System.currentTimeMillis())
-            .put("location", new JSONObject().put("name", "New York, NY").put("latitude", settings.getDouble("latitude"))
-                .put("longitude", settings.getDouble("longitude")))
+            .put("location", new JSONObject().put("name", settings.optString("name", "Local weather"))
+                .put("timezone", settings.optString("timezone", raw.optString("timezone", "America/New_York")))
+                .put("latitude", settings.getDouble("latitude")).put("longitude", settings.getDouble("longitude")))
             .put("units", new JSONObject().put("temperature", "F").put("wind", "mph"))
             .put("current", point(current).put("summary", current.optString("summary", "Current conditions"))
                 .put("feelsLike", current.opt("apparentTemperature")).put("windSpeed", current.opt("windSpeed"))

@@ -58,7 +58,7 @@ import { countdownBanner } from '../countdown-view.js';
     var mins = (e.start - now) / 60000;
     var leave = (App.leaveBy(e) - now) / 60000;
     var who = e.people.map(function (id) { return App.person(id).name; });
-    var whoText = App.isFamily(e) ? 'Family' : who.join(' + ');
+    var whoText = App.isFamily(e) ? App.person('family').name : who.join(' + ');
     var big = mins < 100
       ? '<div class="h-hero-count num">' + Math.round(mins) + '<small>min</small></div>'
       : '<div class="h-hero-count num">' + App.fmt.time(e.start, false) + '<small>' + App.fmt.ampm(e.start) + '</small></div>';

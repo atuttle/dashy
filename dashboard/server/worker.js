@@ -1,15 +1,22 @@
 import { createWeatherService, weatherResponse } from './weather.js';
+import { configResponse, displayConfig, runtimeConfig } from './config.js';
 
 let service;
-let configuredKey;
+let configuredSettings;
 
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
+    if (!path.startsWith('/api/')) return env.ASSETS.fetch(request);
+    let config;
+    try { config = runtimeConfig(env.DASHY_CONFIG ? JSON.parse(env.DASHY_CONFIG) : {}, env); }
+    catch { return Response.json({ error: 'Configuration unavailable' }, { status: 503, headers: { 'Cache-Control': 'no-store' } }); }
+    if (path === '/api/config') return configResponse(request, config);
     if (path === '/api/weather') {
-      if (!service || configuredKey !== env.PIRATE_WEATHER_API_KEY) {
-        configuredKey = env.PIRATE_WEATHER_API_KEY;
-        service = createWeatherService({ apiKey: configuredKey });
+      const settings = JSON.stringify(config.weather);
+      if (!service || configuredSettings !== settings) {
+        configuredSettings = settings;
+        service = createWeatherService({ apiKey: config.weather.apiKey, location: displayConfig(config).weather });
       }
       return weatherResponse(request, service);
     }

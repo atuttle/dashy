@@ -2,6 +2,7 @@
 import './icons.js';
 import './data.js';
 import './app.js';
+import './household.js';
 import './calendars.js';
 import './countdowns.js';
 import './travel.js';

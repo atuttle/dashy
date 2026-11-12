@@ -10,10 +10,14 @@ python3 dashboard/kiosk/config.py import
 python3 dashboard/kiosk/config.py status
 ```
 
-`create` generates the ignored `dashboard/config.local.json` from the secrets already
+`create` generates the ignored `dashboard/config.json` from the secrets already
 in `dashboard/.env.local`. The local JSON is created with owner-only permissions;
 keep a backup. `config.example.json` contains the schema and placeholder values.
 Use `create --force` to regenerate the local file after changing your secrets.
+Alternatively, copy `config.example.json` to `config.json` and edit it directly.
+The `people` map overrides Dad/Mom/Kiddo/Family labels while calendar IDs remain
+`dad`/`mom`/`kiddo`/`family`. The `weather` object supplies the private location,
+including `name`, `latitude`, `longitude`, and `timezone`.
 
 `import` streams the JSON over USB directly into Home HQ's app-private storage and
 verifies its SHA-256. No shared-storage or temporary secrets file is created on
@@ -43,7 +47,7 @@ to force an immediate read of all configured household feeds. It bypasses the
 normal cache/backoff and preserves last-known feed data on failure. It does not
 write to Google Calendar or refresh the separate countdown calendar.
 
-Develop locally and install APK changes only when Dad explicitly requests a frame
+Develop locally and install APK changes only when the owner explicitly requests a frame
 update. Building or changing the dashboard is not permission to deploy it.
 
 Host checks: `python3 dashboard/kiosk/test_config.py`.

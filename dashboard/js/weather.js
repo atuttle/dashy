@@ -1,7 +1,7 @@
 import { WEATHER_LOCATION, WEATHER_REFRESH_MS, WEATHER_MAX_AGE_MS } from './weather-config.js';
 
 const App = window.App;
-const cacheKey = `dashy.weather.${WEATHER_LOCATION.latitude},${WEATHER_LOCATION.longitude}.v1`;
+const cacheKey = () => `dashy.weather.${WEATHER_LOCATION.latitude},${WEATHER_LOCATION.longitude}.v1`;
 let inFlight = false;
 let refreshTimer;
 App.weatherStatus = 'loading';
@@ -26,7 +26,7 @@ async function refresh() {
     if (!validWeather(weather)) throw new Error('Invalid weather');
     window.DATA.weather = weather;
     App.weatherStatus = weather.stale ? 'error' : 'ready';
-    try { localStorage.setItem(cacheKey, JSON.stringify(weather)); } catch { /* Storage is optional. */ }
+    try { localStorage.setItem(cacheKey(), JSON.stringify(weather)); } catch { /* Storage is optional. */ }
   } catch {
     App.weatherStatus = 'error';
   } finally {
@@ -42,7 +42,7 @@ async function refresh() {
 
 App.on('ready', function () {
   try {
-    const cached = JSON.parse(localStorage.getItem(cacheKey));
+    const cached = JSON.parse(localStorage.getItem(cacheKey()));
     if (validWeather(cached) && Date.now() - cached.fetchedAt < WEATHER_MAX_AGE_MS) {
       window.DATA.weather = cached;
       App.weatherStatus = 'ready';
